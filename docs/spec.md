@@ -150,8 +150,10 @@ def on_session_start(payload: dict) -> dict: ...
 Engine, parsing (Fable A):
 
 - AC-01 `keys_in` finds `FR-003`, `SC-002`, `US1`, `US1/AC2` in plain text and in test-name forms (`test_US1_AC2_x`,
-  `us1_ac2`, `fr_003`, `FR003`, `US1-AC2`, `US1 AC2`). Output is canonical (`US1/AC2`, `FR-003`), unique, first-seen order.
-  It does not match inside other words (`BUS1`, `xFR-003`) or longer numbers (`FR-0031`).
+  `us1_ac2`, `fr_003`, `FR003`, `US1-AC2`, `US1 AC2`). It also reads Spec Kit's own heading and converge wording:
+  `User Story 4` is `US4`, and `User Story 4 AC1` or `User Story 4 acceptance scenario 1` is `US4/AC1`. Output is
+  canonical (`US1/AC2`, `FR-003`), unique, first-seen order. It does not match inside other words (`BUS1`, `xFR-003`,
+  `User Stories`) or longer numbers (`FR-0031`).
 - AC-02 `parse_tasks` reads Spec Kit lines (`- [ ] T012 [P] [US1] Create User model in src/models/user.py`) and converge
   lines (`- [ ] T042 Add export per US2/AC1 (missing)`). It ignores non-task lines and handles `[x]` and `[X]`.
 - AC-03 `read_junit` reads pytest, Jest, and Bun style reports, including nested `<testsuites>`. A case with `<failure>`
@@ -183,8 +185,9 @@ Engine, running (Opus A):
 Installer (Opus B):
 
 - AC-10 `load` fills defaults (`lint`, `typecheck`, `junit` empty; `timeout` 300; `cache` true), ignores unknown keys,
-  and returns `None` for a missing file or a non-object. `detect_test` returns `pytest -q` for `pyproject.toml`,
-  `pytest.ini`, or `setup.py`; `bun test` for a `package.json` with a `test` script; otherwise `""`.
+  and returns `None` for a missing file or a non-object. `detect_test` returns
+  `python3 -m pytest -q || test $? -eq 5` for `pyproject.toml`, `pytest.ini`, or `setup.py` (pytest exits 5 when there
+  are no tests yet); `bun test` for a `package.json` with a `test` script; otherwise `""`.
 - AC-11 `active` is true when `.specify/` exists and `integration_state_schema` in `.specify/integration.json` is missing
   or the integer 1. `feature_dir` runs `check-prerequisites --json --paths-only` (sh by default, ps on Windows, py when
   `.specify/init-options.json` says `"script": "py"`) and returns `FEATURE_DIR` as a path. It returns `None` if the script

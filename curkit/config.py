@@ -11,6 +11,8 @@ DEFAULTS = {"test": "", "lint": "", "typecheck": "", "junit": "", "timeout": 300
 MAX_TIMEOUT = 850.0
 COMMAND_KEYS = ("test", "lint", "typecheck")
 PYTHON_MARKERS = ("pyproject.toml", "pytest.ini", "setup.py")
+# pytest exits 5 when a project has no tests yet. That is not a failure.
+PYTEST = "python3 -m pytest -q || test $? -eq 5"
 
 
 @dataclass(frozen=True)
@@ -69,7 +71,7 @@ def commands(cfg: Config) -> dict[str, str]:
 
 def detect_test(root: Path) -> str:
     if any((root / marker).is_file() for marker in PYTHON_MARKERS):
-        return "pytest -q"
+        return PYTEST
     scripts = (read_object(root / "package.json") or {}).get("scripts")
     script = scripts.get("test") if isinstance(scripts, dict) else None
     return "bun test" if isinstance(script, str) and script.strip() else ""

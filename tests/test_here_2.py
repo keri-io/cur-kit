@@ -35,7 +35,7 @@ def test_ac13_seed_writes_the_config_agents_rule_and_workflow(tmp_path):
     (root / "pyproject.toml").write_text("[project]\nname = 'x'\n", encoding="utf-8")
     log = seed(root, runner=no_run)
     assert log == ["add .cursor/cur-kit.json", *(f"add {rel}" for rel in COPIES), f"add {STATE} to .gitignore"]
-    assert config.load(root) == config.Config("pytest -q", "", "", "", 300, True)
+    assert config.load(root) == config.Config(config.PYTEST, "", "", "", 300, True)
     for rel, name in COPIES.items():
         assert (root / rel).read_bytes() == (TEMPLATES / name).read_bytes()
 

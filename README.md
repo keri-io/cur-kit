@@ -55,8 +55,9 @@ cur-kit --here
 
 Then it writes these files. It writes a file only when it is missing and never overwrites one.
 
-- `.cursor/cur-kit.json`, the config. `test` is `pytest -q` when there is a `pyproject.toml`, `pytest.ini`, or
-  `setup.py`, and `bun test` when `package.json` has a `test` script. Otherwise it is empty.
+- `.cursor/cur-kit.json`, the config. `test` is `python3 -m pytest -q || test $? -eq 5` when there is a `pyproject.toml`,
+  `pytest.ini`, or `setup.py`, and `bun test` when `package.json` has a `test` script. Otherwise it is empty. pytest
+  exits 5 when a project has no tests yet, and that command treats 5 as green.
 - `.cursor/agents/cur-kit-scout.md`, `cur-kit-writer.md`, `cur-kit-witness.md`, `cur-kit-reviewer.md`, and
   `cur-kit-diagnose.md`.
 - `.cursor/rules/cur-kit.mdc`, the always-on rule.

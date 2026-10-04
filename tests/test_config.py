@@ -5,7 +5,7 @@ import json
 import pytest
 
 from curkit import config
-from curkit.config import CONFIG_PATH, Config, commands, detect_test, load
+from curkit.config import CONFIG_PATH, PYTEST, Config, commands, detect_test, load
 
 
 def write_config(root, data) -> None:
@@ -58,7 +58,7 @@ def test_ac10_commands_returns_the_non_empty_commands_only():
 def test_ac10_detect_test_returns_pytest_for_python_markers(tmp_path, marker):
     (tmp_path / marker).write_text("", encoding="utf-8")
     (tmp_path / "package.json").write_text('{"scripts": {"test": "jest"}}', encoding="utf-8")
-    assert detect_test(tmp_path) == "pytest -q"
+    assert detect_test(tmp_path) == PYTEST and " -eq 5" in PYTEST
 
 
 @pytest.mark.parametrize("package, expected", [

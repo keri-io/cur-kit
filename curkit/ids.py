@@ -8,6 +8,13 @@ _EDGE = r"(?<![A-Za-z0-9])"
 _END = r"(?![A-Za-z0-9])"
 _REQ = r"(?P<req>FR|SC)[-_]?(?P<num>\d{3})"
 _STORY = r"(?P<story>US\d+)(?:[-_/ ]?(?P<ac>AC\d+))?"
+# Spec Kit's spec headings ("User Story N") and converge's shorthand ("AC1", "acceptance scenario 1").
+_LONG = re.compile(
+    r"(?<![A-Za-z0-9])user[- ]story[- ](?P<n>\d+)"
+    r"(?:[- ,]+(?:ac[- ]?(?P<ac>\d+)|acceptance[- ]scenario[- ](?P<scene>\d+)))?"
+    r"(?![A-Za-z0-9])",
+    re.IGNORECASE,
+)
 KEY = re.compile(f"{_EDGE}(?:{_REQ}|{_STORY}){_END}", re.IGNORECASE)
 STORY = re.compile(r"(US\d+)(?:/AC\d+)?")
 
@@ -19,9 +26,21 @@ def _canonical(match: re.Match[str]) -> str:
     return f"{story}/{match['ac'].upper()}" if match["ac"] else story
 
 
+def _long_key(match: re.Match[str]) -> str:
+    number = match["ac"] or match["scene"]
+    story = f"US{match['n']}"
+    return f"{story}/AC{number}" if number else story
+
+
+def _hits(text: str) -> list[tuple[int, str]]:
+    short = [(match.start(), _canonical(match)) for match in KEY.finditer(text)]
+    long = [(match.start(), _long_key(match)) for match in _LONG.finditer(text)]
+    return sorted([*short, *long])
+
+
 def keys_in(text: str) -> list[str]:
     """Canonical keys in text, unique, in first-seen order."""
-    return list(dict.fromkeys(_canonical(match) for match in KEY.finditer(text)))
+    return list(dict.fromkeys(key for _, key in _hits(text)))
 
 
 def story_of(key: str) -> str | None:

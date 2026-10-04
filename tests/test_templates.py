@@ -18,14 +18,16 @@ MODELS = {
 FILES = [f"agents/{name}.md" for name in MODELS] + ["rules/cur-kit.mdc", "workflow.yml"]
 EMPHASIS = re.compile(r"\b(MUST|NEVER|ALWAYS|CRITICAL|IMPORTANT|ONLY|NOT|DO|NO|STOP|REQUIRED|WARNING)\b")
 WRITER = ["one task", "its own files", "test first", "named after the scenario key", "minimum code",
-          "never run the full suite", "files you touched", "red and green output", "open questions"]
+          "never run the full suite", "files you touched", "red and green output", "open questions",
+          "does not write application code or tests itself"]
 REVIEWER = ["read-only", "scenario text", "the spec and the test", "not the writer's transcript",
             "do not run speckit-analyze"]
 RULE = ["always run", "cur-kit-writer", "at most two", "separate files", "fr-###", "sc-###", "usn", "usn/acn",
         "nothing is marked [x] while the suite is red", "cur-kit-reviewer", "matched the scenario to the test",
         "hooks never start a skill", "specify workflow run .cursor/cur-kit/workflow.yml", "spec.md", "plan.md",
         "research.md", "tasks.md", "checklists", "changelog.md", ".cursor/cur-kit.json",
-        "secrets never go in messages", "one json line", ".cursor/cur-kit/state/slots.jsonl"]
+        "secrets never go in messages", "one json line", ".cursor/cur-kit/state/slots.jsonl",
+        "does not write application code or tests", "gives every implementation task to cur-kit-writer"]
 R14 = {
     "agents/cur-kit-writer.md": [
         ("never run the full suite. the full suite runs after the turn, through the stop hook or cur-kit check in a "

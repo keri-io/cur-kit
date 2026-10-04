@@ -20,6 +20,10 @@ All notable changes to this project are documented here. The format follows Keep
 ### Changed
 
 - The check-off guard treats a skipped test as not passing.
+- `keys_in` reads Spec Kit's own wording: `User Story 4 AC1` and `acceptance scenario 1` become `US4/AC1`.
+- `cur-kit --here` writes a pytest command that treats exit code 5, "no tests collected", as green.
+- The rule and the writer agent say the parent does not write application code or tests during implement. It gives
+  every implementation task to `cur-kit-writer`.
 - `install` shell-quotes the hook command and replaces an older cur-kit entry instead of adding a second one.
 - The writer agent and the rule say commits and pushes are the parent's.
 
