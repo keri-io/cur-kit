@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# cur-kit entry point. Resolves symlinks such as ~/.local/bin/cur-kit to find the repo.
+set -euo pipefail
+root="$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")"
+# The repo goes on sys.path inside Python rather than in PYTHONPATH, so the project's own commands see the
+# user's environment unchanged. -P keeps the current directory off sys.path, so a project file like json.py
+# cannot shadow the stdlib.
+boot='import os, runpy, sys
+sys.path.insert(0, os.environ.pop("CUR_KIT_ROOT"))
+runpy.run_module("curkit", run_name="__main__", alter_sys=True)'
+CUR_KIT_ROOT="$root" exec python3 -P -c "$boot" "$@"

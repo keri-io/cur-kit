@@ -1,0 +1,19 @@
+---
+description: cur-kit contract for Spec Kit work on Cursor
+alwaysApply: true
+---
+
+# cur-kit
+
+This project runs Spec Kit through cur-kit.
+
+- Always Run: when "test" is set in `.cursor/cur-kit.json`, the suite runs after every completed turn. A red result comes back as the next message.
+- The parent plans. Children write code through the `cur-kit-writer` agent, one task each, at most two at once, on separate files.
+- Commits and pushes are the parent's. Children never commit or push.
+- Pick a child by its agent type and do not pass a model. Each agent file in `.cursor/agents/` sets its own.
+- Test names cite the keys they prove: `FR-###`, `SC-###`, `USn`, or `USn/ACn`, for example `test_US1_AC2_redirects`.
+- Nothing is marked [x] while the suite is red, or before `cur-kit-reviewer` has matched the scenario to the test.
+- Hooks never start a skill. The human types a skill, or runs `specify workflow run .cursor/cur-kit/workflow.yml` for the implement and converge loop.
+- One writer at a time edits `spec.md`, `plan.md`, `research.md`, `tasks.md`, checklists, `CHANGELOG.md`, and `.cursor/cur-kit.json`. Children send changes to these files back to the parent.
+- Secrets never go in messages, prompts, or agent files. Refer to a secret by its environment variable name, like `$STRIPE_KEY`.
+- After each child returns, record it as one JSON line in `.cursor/cur-kit/state/slots.jsonl`, for example `{"agent": "cur-kit-writer", "task": "T014", "files": ["src/auth.py", "tests/test_auth.py"], "result": "green"}`.

@@ -1,0 +1,49 @@
+# cur-kit converge loop. Run it from the project root:
+#   specify workflow run .cursor/cur-kit/workflow.yml
+# Each pass runs implement, then converge, then cur-kit check. The loop repeats
+# while tasks are open or the check is red, at most 3 passes. Then a gate asks
+# you for the next skill.
+schema_version: "1.0"
+workflow:
+  id: "cur-kit-converge"
+  name: "cur-kit converge loop"
+  version: "0.1.0"
+  author: "cur-kit"
+  description: "Implement and converge until no task is open and the check is green, then pick the next skill."
+
+requires:
+  speckit_version: ">=1.0.13"
+
+inputs:
+  # A command step with no integration cannot dispatch. "auto" reads it from .specify/integration.json.
+  integration:
+    type: string
+    default: "auto"
+    prompt: "Integration to use ('auto' uses the project's initialized integration)"
+
+steps:
+  - id: build
+    type: do-while
+    max_iterations: 3
+    condition: "{{ steps.remaining.output.data.open > 0 or steps.remaining.output.data.red }}"
+    steps:
+      - id: implement
+        command: speckit.implement
+        integration: "{{ inputs.integration }}"
+        input:
+          args: "{{ steps.remaining.output.stdout | default('') }}"
+      - id: converge
+        command: speckit.converge
+        integration: "{{ inputs.integration }}"
+      - id: remaining
+        type: shell
+        run: "cur-kit check --json"
+        output_format: json
+        # The suite's own limit is "timeout" in .cursor/cur-kit.json. The engine's default here is 300 seconds.
+        timeout: 900
+  - id: review
+    type: gate
+    message: "Loop finished. Pick the next skill."
+    options: [done, implement, clarify, plan]
+    # The engine rejects the default on_reject (abort) when no option is reject or abort.
+    on_reject: skip
