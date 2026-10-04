@@ -73,9 +73,9 @@ Set `test` to the real suite. Spec Kit has no test command. While `test` is empt
 
 ```json
 {
-  "test": "pytest -q --junitxml=report.xml",
-  "lint": "ruff check .",
-  "typecheck": "",
+  "test": "bun test --pass-with-no-tests --reporter=junit --reporter-outfile=report.xml",
+  "lint": "bunx oxlint src spacetimedb/src --ignore-pattern src/module_bindings",
+  "typecheck": "bunx tsc --noEmit -p tsconfig.json && bunx tsc --noEmit -p spacetimedb/tsconfig.json",
   "junit": "report.xml",
   "timeout": 300,
   "cache": true
