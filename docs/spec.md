@@ -200,7 +200,7 @@ Installer (Opus B):
   the five agent files, `.cursor/rules/cur-kit.mdc`, `.cursor/cur-kit/workflow.yml`. It appends
   `.cursor/cur-kit/state/` to `.gitignore` once. It never touches `.specify/` or `.cursor/skills/`.
 - AC-14 Agent files: `cur-kit-scout`, `cur-kit-writer`, `cur-kit-witness` use `model: composer-2.5`; `cur-kit-reviewer`
-  uses `model: gpt-5.6-sol-medium`; `cur-kit-diagnose` uses `model: grok-4.7-medium`. Each has `name`, `description`,
+  uses `model: grok-4.7[effort=xhigh,context=500k]`; `cur-kit-diagnose` uses `model: grok-4.7-medium`. Each has `name`, `description`,
   `model` frontmatter. Scout, witness, reviewer, and diagnose say they are read-only. The writer says: one task, only its
   own files, red test first named after the scenario key, minimum code, never run the full suite, return files touched,
   the red and green output, and open questions. The reviewer compares the scenario text to the test, gets the spec and

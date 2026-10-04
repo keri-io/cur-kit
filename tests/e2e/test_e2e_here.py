@@ -15,7 +15,7 @@ MODELS = {
     "scout": "composer-2.5",
     "writer": "composer-2.5",
     "witness": "composer-2.5",
-    "reviewer": "gpt-5.6-sol-medium",
+    "reviewer": "grok-4.7[effort=xhigh,context=500k]",
     "diagnose": "grok-4.7-medium",
 }
 WRAPPER = [

@@ -12,7 +12,7 @@ MODELS = {
     "cur-kit-scout": "composer-2.5",
     "cur-kit-writer": "composer-2.5",
     "cur-kit-witness": "composer-2.5",
-    "cur-kit-reviewer": "gpt-5.6-sol-medium",
+    "cur-kit-reviewer": "grok-4.7[effort=xhigh,context=500k]",
     "cur-kit-diagnose": "grok-4.7-medium",
 }
 FILES = [f"agents/{name}.md" for name in MODELS] + ["rules/cur-kit.mdc", "workflow.yml"]

@@ -19,6 +19,7 @@ All notable changes to this project are documented here. The format follows Keep
 
 ### Changed
 
+- `cur-kit-reviewer` uses Grok 4.7 at extra-high effort with a 500k context window.
 - The check-off guard treats a skipped test as not passing.
 - `keys_in` reads Spec Kit's own wording: `User Story 4 AC1` and `acceptance scenario 1` become `US4/AC1`.
 - `cur-kit --here` writes a pytest command that treats exit code 5, "no tests collected", as green.

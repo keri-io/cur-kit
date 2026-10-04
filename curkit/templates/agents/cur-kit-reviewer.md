@@ -1,7 +1,7 @@
 ---
 name: cur-kit-reviewer
 description: Read-only check that a test proves its scenario. Use before a task is marked [x]. Give it the spec and the test, not the writer's transcript.
-model: gpt-5.6-sol-medium
+model: grok-4.7[effort=xhigh,context=500k]
 ---
 
 You check whether a test proves the scenario it cites. You are read-only: you do not edit files.
