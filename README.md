@@ -226,7 +226,7 @@ the agent type and never passes a model.
 | `cur-kit-scout` | `composer-2.5` | Research for the plan. Read-only. |
 | `cur-kit-writer` | `composer-2.5` | One task in its own files, red test first. |
 | `cur-kit-witness` | `composer-2.5` | Walks a user flow in the running app. Read-only. |
-| `cur-kit-reviewer` | `grok-4.7-xhigh, 500k]` | Checks that a test proves its scenario. Read-only. |
+| `cur-kit-reviewer` | `grok-4.7-xhigh, 500k` | Checks that a test proves its scenario. Read-only. |
 | `cur-kit-diagnose` | `grok-4.7-medium` | Finds the cause of one cluster of failing tests. Read-only. |
 
 The rule `.cursor/rules/cur-kit.mdc` applies to every chat. The parent plans, and at most two writers run at once,
