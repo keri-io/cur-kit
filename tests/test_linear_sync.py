@@ -89,7 +89,7 @@ def test_a_missing_key_queues_the_mcp_board_and_a_missing_team_does_nothing(tmp_
     board.calls = []
     sync(root, {"red": False}, board)
     path = root / ".cursor/cur-kit/state/linear-board.json"
-    assert board.calls == [] and not path.exists()
+    assert board.calls == [] and json.loads(path.read_text(encoding="utf-8"))["team"] == ""
     enable(root, monkeypatch)
     monkeypatch.delenv("LINEAR_API_KEY")
     path.parent.mkdir(parents=True, exist_ok=True)

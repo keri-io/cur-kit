@@ -6,9 +6,9 @@ All notable changes to this project are documented here. The format follows Keep
 
 ### Added
 
-- A Linear mirror of the repo. With `linear.team` set, the stop hook writes `linear-board.json` and the Cursor
-  Linear MCP applies it on the next turn. `LINEAR_API_KEY` remains an optional direct path. Spec Kit skills stay
-  untouched.
+- A Linear mirror of the repo. The stop hook writes `linear-board.json` and the Cursor Linear MCP applies it on
+  the next turn. A personal account needs no team key. `LINEAR_API_KEY` remains an optional direct path. Spec Kit
+  skills stay untouched.
 - Project skeleton, build spec in `docs/spec.md`, and the quality gate checker in `scripts/gates.py`.
 - Parsing engine: scenario keys (`ids`), Spec Kit tasks (`tasks`), JUnit reports (`junit`), the check-off guard
   (`guard`), and follow-up text (`followup`).
