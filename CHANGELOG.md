@@ -44,6 +44,10 @@ All notable changes to this project are documented here. The format follows Keep
 
 ### Fixed
 
+- A green converge stop submits `/speckit-implement` when a new open task id appeared since that turn started, even
+  if the saved reply is empty, is a paraphrase, or says the work converged. `not converged` leaves the loop open
+  when the reply names implement. Checking off an old task leaves the loop stopped. Open task ids are stored when
+  `beforeSubmitPrompt` records a converge prompt and when stop submits `/speckit-converge`.
 - The check result caps each command's output at 30 lines and 4000 characters, and `failing` at 50 names, so the
   workflow's implement argument stays under Linux's 128 KiB limit.
 - A tracked edit made while the suite runs no longer gets keyed as tested (`tree.tracked_print`).

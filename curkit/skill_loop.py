@@ -1,14 +1,15 @@
-"""The stop hook's implement and converge follow-ups."""
+"""Record implement and converge turns. skill_next picks the next command."""
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
 
+from curkit.skill_next import next_command, snapshot
+
 SKILL = ".cursor/cur-kit/state/skill.json"
 CONVERGE = "/speckit-converge"
 IMPLEMENT = "/speckit-implement"
-DONE = ("converged", "no further implement", "implementation is complete")
 _COMMANDS = (
     ("/speckit-implement", "implement"),
     ("/speckit.implement", "implement"),
@@ -23,6 +24,8 @@ def note_prompt(root: Path, payload: dict) -> dict:
     value = payload.get("prompt")
     record["prompt"] = value if isinstance(value, str) else ""
     record["response"] = ""
+    if _kind(record["prompt"]) == "converge":
+        snapshot(root, record)
     _write(root, record)
     return {"continue": True}
 
@@ -39,13 +42,10 @@ def note_response(root: Path, payload: dict) -> dict:
 def after_green(root: Path, payload: dict) -> dict:
     """Submit the next skill when the suite is green, or `{}` when the loop is done."""
     record = _open(root, payload)
-    kind = _kind(record.get("prompt"))
-    message = ""
-    if kind == "implement" or (record.get("owed") and kind != "converge"):
+    message = next_command(root, record, _kind(record.get("prompt")))
+    if message == CONVERGE:
         record["owed"] = False
-        message = CONVERGE
-    elif kind == "converge" and _again(record.get("response")):
-        message = IMPLEMENT
+        snapshot(root, record)
     # A follow-up often skips the prompt hook, so the next stop must see this command.
     if message:
         record["prompt"] = message
@@ -107,10 +107,3 @@ def _line_command(line: str) -> str:
         if text == command or text.startswith(command + " "):
             return name
     return ""
-
-
-def _again(text: object) -> bool:
-    body = text.lower() if isinstance(text, str) else ""
-    if any(phrase in body for phrase in DONE):
-        return False
-    return "speckit-implement" in body or "speckit.implement" in body
