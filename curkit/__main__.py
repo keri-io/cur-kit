@@ -8,7 +8,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
-from curkit import __version__, check, here, hooks, install, skill_loop
+from curkit import __version__, check, here, hooks, install, linear_sync, skill_loop
 
 BIN = Path(__file__).resolve().parent.parent / "bin" / "cur-kit"
 
@@ -23,6 +23,9 @@ def parser() -> argparse.ArgumentParser:
     setup = commands.add_parser("install", help="install the Cursor hooks and ~/.local/bin/cur-kit")
     setup.add_argument("--home", type=Path, help="home folder to install into (default: your home)")
     commands.add_parser("hook", help="answer a Cursor hook from JSON on stdin")
+    board = commands.add_parser("linear", help="mirror the repo to its Linear project")
+    board_cmds = board.add_subparsers(dest="linear_command")
+    board_cmds.add_parser("sync", help="publish spec, plan, tasks, and checklists")
     return top
 
 
@@ -40,6 +43,8 @@ def main(argv: list[str] | None = None) -> int:
     if opts.command == "install":
         home = opts.home or Path.home()
         return report(lambda: [*install.install_hooks(home, str(BIN)), install.link_bin(home, BIN)])
+    if opts.command == "linear":
+        return _linear(opts)
     top.print_help()
     return 2
 
@@ -68,6 +73,13 @@ def _dispatch(args: list[str], payload: dict) -> dict:
     if name == "after-response":
         return skill_loop.note_response(root, payload)
     return {}
+
+
+def _linear(opts) -> int:
+    if opts.linear_command != "sync":
+        return 2
+    linear_sync.sync(Path.cwd(), checked(Path.cwd()))
+    return 0
 
 
 def checked(root: Path) -> dict:
