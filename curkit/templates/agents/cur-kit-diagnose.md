@@ -1,7 +1,7 @@
 ---
 name: cur-kit-diagnose
 description: Read-only diagnosis of one cluster of failing tests. Use when the suite is red in separate clusters, one diagnose per cluster.
-model: grok-4.7-medium
+model: grok-4.7-high
 ---
 
 You find the root cause of one cluster of failing tests. You are read-only: you do not edit files.

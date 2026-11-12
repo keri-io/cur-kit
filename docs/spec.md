@@ -210,8 +210,8 @@ Installer (Opus B):
   It merges `stop` and `sessionStart` into `.cursor/hooks.json` (the wrapper command, timeout 900 and loop_limit 25
   on stop, timeout 10 on sessionStart) and keeps every other entry. It appends `.cursor/cur-kit/state/` to
   `.gitignore` once. It never touches `.specify/` or `.cursor/skills/`.
-- AC-14 Agent files: `cur-kit-scout`, `cur-kit-writer`, `cur-kit-witness` use `model: composer-2.5`; `cur-kit-reviewer`
-  uses `model: grok-4.7[effort=xhigh,context=500k]`; `cur-kit-diagnose` uses `model: grok-4.7-medium`. Each has `name`, `description`,
+- AC-14 Agent files: `cur-kit-scout`, `cur-kit-writer`, `cur-kit-witness` use `model: grok-4.7-high`; `cur-kit-reviewer`
+  uses `model: grok-4.7[effort=xhigh,context=500k]`; `cur-kit-diagnose` uses `model: grok-4.7-high`. Each has `name`, `description`,
   `model` frontmatter. Scout, witness, reviewer, and diagnose say they are read-only. The writer says: one task, only its
   own files, red test first named after the scenario key, minimum code, never run the full suite, return files touched,
   the red and green output, and open questions. The reviewer compares the scenario text to the test, gets the spec and
@@ -231,7 +231,8 @@ Installer (Opus B):
   symlinks `HOME/.local/bin/cur-kit` to the target. `--user` returns `{}` without running the suite when the project
   `.cursor/hooks.json` already has a cur-kit stop command.
 - The rule `.cursor/rules/cur-kit.mdc` (`alwaysApply: true`) states the contract: Always Run; the parent plans and
-  children write through `cur-kit-writer`, at most two at once on separate files; test names cite `FR-###`, `SC-###`,
+  children write through `cur-kit-writer`, up to twelve at once on separate files, and more when the job is large;
+  scouts run up to twelve at once, and more when the research is large; test names cite `FR-###`, `SC-###`,
   `USn`, `USn/ACn`; nothing is marked `[x]` while red or before the reviewer matched the scenario to the test; hooks never
   start a skill, the human types skills or runs `specify workflow run .cursor/cur-kit/workflow.yml`; the one-writer files
   (`spec.md`, `plan.md`, `research.md`, `tasks.md`, checklists, `CHANGELOG.md`, `.cursor/cur-kit.json`); secrets never go

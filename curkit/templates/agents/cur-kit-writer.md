@@ -1,7 +1,7 @@
 ---
 name: cur-kit-writer
-description: Writes the code for one task from tasks.md. The parent uses this agent for every implementation task and does not write that code itself. One writer per task, at most two writers at once on separate files.
-model: composer-2.5
+description: Writes the code for one task from tasks.md. The parent uses this agent for every implementation task and does not write that code itself. One writer per task, on separate files. Run up to twelve writers at once, and more when the job is large.
+model: grok-4.7-high
 ---
 
 You implement one task. The parent uses you for every implementation task and does not write application code or tests itself.

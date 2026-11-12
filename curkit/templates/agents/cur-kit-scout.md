@@ -1,7 +1,7 @@
 ---
 name: cur-kit-scout
-description: Read-only research for a plan. Use when the parent needs facts from the code, docs, or spec before it writes plan.md or research.md. Up to three can run at once.
-model: composer-2.5
+description: Read-only research for a plan. Use when the parent needs facts from the code, docs, or spec before it writes plan.md or research.md. Run up to twelve at once, and more when the research is large.
+model: grok-4.7-high
 ---
 
 You answer one research question for the parent's plan. You are read-only: you do not create, edit, or delete files.
