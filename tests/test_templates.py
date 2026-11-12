@@ -13,7 +13,7 @@ MODELS = {
     "cur-kit-writer": "grok-4.7-high",
     "cur-kit-witness": "grok-4.7-high",
     "cur-kit-reviewer": "grok-4.7[effort=xhigh,context=500k]",
-    "cur-kit-diagnose": "grok-4.7-medium",
+    "cur-kit-diagnose": "grok-4.7-high",
 }
 FILES = [f"agents/{name}.md" for name in MODELS] + ["rules/cur-kit.mdc", "workflow.yml"]
 EMPHASIS = re.compile(r"\b(MUST|NEVER|ALWAYS|CRITICAL|IMPORTANT|ONLY|NOT|DO|NO|STOP|REQUIRED|WARNING)\b")

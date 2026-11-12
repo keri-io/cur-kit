@@ -248,7 +248,7 @@ the agent type and never passes a model.
 | `cur-kit-writer` | `grok-4.7-high` | One task in its own files, red test first. |
 | `cur-kit-witness` | `grok-4.7-high` | Walks a user flow in the running app. Read-only. |
 | `cur-kit-reviewer` | `grok-4.7-xhigh, 500k` | Checks that a test proves its scenario. Read-only. |
-| `cur-kit-diagnose` | `grok-4.7-medium` | Finds the cause of one cluster of failing tests. Read-only. |
+| `cur-kit-diagnose` | `grok-4.7-high` | Finds the cause of one cluster of failing tests. Read-only. |
 
 The rule `.cursor/rules/cur-kit.mdc` applies to every chat. The parent plans. Writers run up to twelve at once, on
 separate files, and a large job may run more. Scouts do the same. Test names cite `FR-###`, `SC-###`, `USn`, or

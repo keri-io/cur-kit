@@ -16,7 +16,7 @@ MODELS = {
     "writer": "grok-4.7-high",
     "witness": "grok-4.7-high",
     "reviewer": "grok-4.7[effort=xhigh,context=500k]",
-    "diagnose": "grok-4.7-medium",
+    "diagnose": "grok-4.7-high",
 }
 WRAPPER = [
     ".cursor/cur-kit.json",
