@@ -8,7 +8,7 @@ import sys
 from collections.abc import Callable
 from pathlib import Path
 
-from curkit import __version__, check, here, hooks, install
+from curkit import __version__, check, here, hooks, install, skill_loop
 
 BIN = Path(__file__).resolve().parent.parent / "bin" / "cur-kit"
 
@@ -22,7 +22,7 @@ def parser() -> argparse.ArgumentParser:
     run.add_argument("--json", action="store_true", help="print the result on one line")
     setup = commands.add_parser("install", help="install the Cursor hooks and ~/.local/bin/cur-kit")
     setup.add_argument("--home", type=Path, help="home folder to install into (default: your home)")
-    commands.add_parser("hook", help="answer a Cursor hook: stop or session-start, JSON on stdin")
+    commands.add_parser("hook", help="answer a Cursor hook from JSON on stdin")
     return top
 
 
@@ -62,6 +62,11 @@ def _dispatch(args: list[str], payload: dict) -> dict:
         return hooks.on_stop(payload, user="--user" in args[1:])
     if name == "session-start":
         return hooks.on_session_start(payload)
+    root = hooks.project_root(payload)
+    if name == "before-submit":
+        return skill_loop.note_prompt(root, payload)
+    if name == "after-response":
+        return skill_loop.note_response(root, payload)
     return {}
 
 

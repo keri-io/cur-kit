@@ -10,7 +10,8 @@ Children get their model from project agent files.
 
 - Stdlib Python 3.11+ only. No third-party imports in `curkit/`.
 - Never edit or generate anything under `.cursor/skills/speckit-*` or `.specify/` in a target project.
-- Hooks never start a Spec Kit skill. No daemon, no chatroom, no secrets in agent messages.
+- The stop hook may submit only `/speckit-converge` after implement and `/speckit-implement` when converge asks
+  for it. No daemon, no chatroom, no secrets in agent messages.
 - Every hook command exits 0 and prints JSON, even on internal errors (emit `{}`).
 - Commands from the project config run with `shell=True` in the project root. They are the project's own commands.
 
@@ -281,7 +282,12 @@ Quality (everyone):
    (`config.load(project_root(payload))` is `None`): `{}`. `cur-kit hook stop --user` is also `{}` when the project's
    `.cursor/hooks.json` already has a cur-kit stop command (the command contains `cur-kit` and ends in `stop` or
    `stop --user`).
-2. `result = run_check(root)`. Not red: `State.clear_latch()`, `{}`.
+2. `result = run_check(root)`. Not red: `State.clear_latch()`, then a skill follow-up or `{}`. Implement, or a
+   green stop while converge is still owed after a red implement, submits `/speckit-converge`. Converge submits
+   `/speckit-implement` only when the saved assistant text names `speckit-implement` or `speckit.implement` and does
+   not say the work is finished (`converged`, `no further implement`, `implementation is complete`). Red implement
+   keeps the suite follow-up and sets that debt. `beforeSubmitPrompt` stores the prompt and `afterAgentResponse`
+   stores the reply in `.cursor/cur-kit/state/skill.json`.
 3. `failure = state.failure_print(result["failing"], output)` where `output` joins the failing outcomes' output; when the
    commands passed but `guard` has entries, use `state.failure_print(["guard: " + g for g in guard], "")`.
 4. A non-empty `conversation_id` that differs from the one stored on the latch resets the count first. Then

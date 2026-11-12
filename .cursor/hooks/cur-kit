@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Project hook. Cloud agents run this from the repository root.
+# Project hook. Events: stop, session-start, before-submit, after-response.
 set -euo pipefail
 event="${1:?}"
 here="${BASH_SOURCE[0]%/*}"

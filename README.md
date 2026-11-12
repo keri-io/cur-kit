@@ -4,9 +4,10 @@ cur-kit is Always Run for [Spec Kit](https://github.com/github/spec-kit) on Curs
 command, cur-kit runs the suite after every completed agent turn. A red result comes back to the agent as its next
 message.
 
-Spec Kit stays an upgradable dependency. cur-kit never edits `.specify/` or `.cursor/skills/speckit-*`, and its hooks
-never start a Spec Kit skill. The implement and converge loop runs through `specify workflow`. Subagents get their
-model from agent files in the project's `.cursor/agents/`.
+Spec Kit stays an upgradable dependency. cur-kit never edits `.specify/` or `.cursor/skills/speckit-*`. After
+`/speckit-implement`, the stop hook submits `/speckit-converge`. If that reply names `/speckit-implement` and does
+not say the work is finished, the next stop submits implement. `specify workflow` still runs the same loop headless.
+Subagents get their model from agent files in the project's `.cursor/agents/`.
 
 ## Requirements
 
@@ -66,9 +67,10 @@ Then it writes these files. It writes a file only when it is missing and never o
   `cur-kit-diagnose.md`.
 - `.cursor/rules/cur-kit.mdc`, the always-on rule.
 - `.cursor/cur-kit/workflow.yml`, the converge loop.
-- `.cursor/hooks/cur-kit`, the project hook command, and a `stop` plus `sessionStart` entry in `.cursor/hooks.json`.
-  `stop` runs `bash .cursor/hooks/cur-kit stop` with `timeout` 900 and `loop_limit` 25. Cloud agents load this file.
-  `sessionStart` is for the desktop app and for self-hosted workers. Managed cloud agents do not send that step.
+- `.cursor/hooks/cur-kit`, the project hook command, and entries in `.cursor/hooks.json` for `stop`,
+  `sessionStart`, `beforeSubmitPrompt`, and `afterAgentResponse`. `stop` runs `bash .cursor/hooks/cur-kit stop`
+  with `timeout` 900 and `loop_limit` 25. Cloud agents load this file. `sessionStart` is for the desktop app and
+  for self-hosted workers. Managed cloud agents do not send that step.
 
 It also adds `.cursor/cur-kit/state/` to `.gitignore`, once. If `.cursor/hooks.json` is not valid JSON, `--here` exits 1
 and leaves that file alone.
@@ -165,6 +167,11 @@ Run it from the project root. Each pass runs `speckit.implement`, then `speckit.
 repeats while a task is open or the check is red, at most 3 times. Then a gate asks you to pick the next skill:
 done, implement, clarify, or plan.
 
+In a chat, the stop hook does the same handoff. A green `/speckit-implement` turn submits `/speckit-converge`.
+A red suite still comes back first, and converge waits until a later stop is green. A converge reply submits
+`/speckit-implement` only when it names that command and does not say the work is finished (`converged`,
+`no further implement`, or `implementation is complete`). A reply that never names the command ends the loop.
+
 Each step is a headless `cursor-agent` run, so run the loop on a branch or in a worktree. The check step calls
 `cur-kit` from PATH, so `~/.local/bin` must be on PATH. To see the steps without running them:
 
@@ -189,7 +196,8 @@ Cursor runs `cur-kit hook stop` when an agent turn ends.
    passing test that cites `US1` or one of its scenarios, like `test_US1_AC2_redirects`. No citing test may fail.
    Story keys are not scoped to a feature, so a passing `US1` test from another feature also counts for this
    feature's `[US1]` tasks.
-5. Green. The hook clears the latch and returns `{}`.
+5. Green. The hook clears the latch. It then submits `/speckit-converge` or `/speckit-implement` when the skill
+   loop above still has a next step, and otherwise returns `{}`.
 6. Latch. Each distinct failure is reported at most twice. A failure is the set of failing test names, or the end
    of the output when there are no names. The second report says the same failure came back after a change, or
    that it is still there and nothing changed. Either way it tells the agent to stop and tell you if it can't fix

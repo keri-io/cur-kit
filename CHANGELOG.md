@@ -19,6 +19,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ### Changed
 
+- After `/speckit-implement`, a green stop submits `/speckit-converge`. If that reply names implement and does not
+  say the work is finished, the next stop submits `/speckit-implement`. A red suite still comes back first.
 - `cur-kit --here` merges a project `stop` and `sessionStart` hook into `.cursor/hooks.json` and writes
   `.cursor/hooks/cur-kit`, so Cursor Cloud runs the suite. The user-level stop command is `hook stop --user` and stays
   quiet when that project hook is present. A new non-empty `conversation_id` resets the red latch, because managed

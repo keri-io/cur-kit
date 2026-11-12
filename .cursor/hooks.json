@@ -13,6 +13,18 @@
         "command": "bash .cursor/hooks/cur-kit session-start",
         "timeout": 10
       }
+    ],
+    "beforeSubmitPrompt": [
+      {
+        "command": "bash .cursor/hooks/cur-kit before-submit",
+        "timeout": 10
+      }
+    ],
+    "afterAgentResponse": [
+      {
+        "command": "bash .cursor/hooks/cur-kit after-response",
+        "timeout": 10
+      }
     ]
   }
 }
