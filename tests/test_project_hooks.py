@@ -10,7 +10,16 @@ from pathlib import Path
 import pytest
 
 from curkit.install import InstallError
-from curkit.project_hooks import START_COMMAND, STOP_COMMAND, TEMPLATE, WRAPPER, hook_entries, install_project_hooks
+from curkit.project_hooks import (
+    AFTER_COMMAND,
+    BEFORE_COMMAND,
+    START_COMMAND,
+    STOP_COMMAND,
+    TEMPLATE,
+    WRAPPER,
+    hook_entries,
+    install_project_hooks,
+)
 
 
 def _place(root: Path) -> None:
@@ -37,7 +46,13 @@ def test_install_project_hooks_writes_the_cloud_hooks(tmp_path):
     data = json.loads((tmp_path / ".cursor" / "hooks.json").read_text(encoding="utf-8"))
     assert data["hooks"] == {name: [entry] for name, entry in hook_entries().items()}
     assert (tmp_path / WRAPPER).read_bytes() == TEMPLATE.read_bytes()
-    assert log == [f"add {WRAPPER}", f"add stop hook: {STOP_COMMAND}", f"add sessionStart hook: {START_COMMAND}"]
+    assert log == [
+        f"add {WRAPPER}",
+        f"add stop hook: {STOP_COMMAND}",
+        f"add sessionStart hook: {START_COMMAND}",
+        f"add beforeSubmitPrompt hook: {BEFORE_COMMAND}",
+        f"add afterAgentResponse hook: {AFTER_COMMAND}",
+    ]
 
 
 def test_install_project_hooks_keeps_other_entries_and_is_idempotent(tmp_path):

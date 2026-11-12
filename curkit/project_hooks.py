@@ -10,6 +10,8 @@ from curkit.install import merge, read_hooks
 WRAPPER = ".cursor/hooks/cur-kit"
 STOP_COMMAND = f"bash {WRAPPER} stop"
 START_COMMAND = f"bash {WRAPPER} session-start"
+BEFORE_COMMAND = f"bash {WRAPPER} before-submit"
+AFTER_COMMAND = f"bash {WRAPPER} after-response"
 TEMPLATE = Path(__file__).parent / "templates" / "hooks" / "cur-kit"
 
 
@@ -17,6 +19,8 @@ def hook_entries() -> dict[str, dict]:
     return {
         "stop": {"command": STOP_COMMAND, "timeout": 900, "loop_limit": 25},
         "sessionStart": {"command": START_COMMAND, "timeout": 10},
+        "beforeSubmitPrompt": {"command": BEFORE_COMMAND, "timeout": 10},
+        "afterAgentResponse": {"command": AFTER_COMMAND, "timeout": 10},
     }
 
 

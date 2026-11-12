@@ -7,14 +7,20 @@ import pytest
 import curkit
 from curkit import config
 from curkit.here import seed
-from curkit.project_hooks import START_COMMAND, STOP_COMMAND, WRAPPER
+from curkit.project_hooks import AFTER_COMMAND, BEFORE_COMMAND, START_COMMAND, STOP_COMMAND, WRAPPER
 
 TEMPLATES = Path(curkit.__file__).parent / "templates"
 AGENTS = ["scout", "writer", "witness", "reviewer", "diagnose"]
 COPIES = {f".cursor/agents/cur-kit-{name}.md": f"agents/cur-kit-{name}.md" for name in AGENTS}
 COPIES |= {".cursor/rules/cur-kit.mdc": "rules/cur-kit.mdc", ".cursor/cur-kit/workflow.yml": "workflow.yml"}
 STATE = ".cursor/cur-kit/state/"
-HOOKS = [f"add {WRAPPER}", f"add stop hook: {STOP_COMMAND}", f"add sessionStart hook: {START_COMMAND}"]
+HOOKS = [
+    f"add {WRAPPER}",
+    f"add stop hook: {STOP_COMMAND}",
+    f"add sessionStart hook: {START_COMMAND}",
+    f"add beforeSubmitPrompt hook: {BEFORE_COMMAND}",
+    f"add afterAgentResponse hook: {AFTER_COMMAND}",
+]
 
 
 def project(tmp_path):
