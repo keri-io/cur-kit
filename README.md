@@ -170,7 +170,10 @@ done, implement, clarify, or plan.
 In a chat, the stop hook does the same handoff. A green `/speckit-implement` turn submits `/speckit-converge`.
 A red suite still comes back first, and converge waits until a later stop is green. A converge reply submits
 `/speckit-implement` only when it names that command and does not say the work is finished (`converged`,
-`no further implement`, or `implementation is complete`). A reply that never names the command ends the loop.
+`no further implement`, or `implementation is complete`). A reply that never names the command ends the loop. The stock Spec Kit skills are not edited. A converge
+prompt that also mentions implement in a sentence stays a converge turn. Cloud often sends the chat id only on
+stop, and it may skip the prompt hook for a follow-up. cur-kit keeps that turn and remembers the command it just
+submitted.
 
 Each step is a headless `cursor-agent` run, so run the loop on a branch or in a worktree. The check step calls
 `cur-kit` from PATH, so `~/.local/bin` must be on PATH. To see the steps without running them:

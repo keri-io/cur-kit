@@ -9,6 +9,12 @@ SKILL = ".cursor/cur-kit/state/skill.json"
 CONVERGE = "/speckit-converge"
 IMPLEMENT = "/speckit-implement"
 DONE = ("converged", "no further implement", "implementation is complete")
+_COMMANDS = (
+    ("/speckit-implement", "implement"),
+    ("/speckit.implement", "implement"),
+    ("/speckit-converge", "converge"),
+    ("/speckit.converge", "converge"),
+)
 
 
 def note_prompt(root: Path, payload: dict) -> dict:
@@ -40,6 +46,10 @@ def after_green(root: Path, payload: dict) -> dict:
         message = CONVERGE
     elif kind == "converge" and _again(record.get("response")):
         message = IMPLEMENT
+    # A follow-up often skips the prompt hook, so the next stop must see this command.
+    if message:
+        record["prompt"] = message
+        record["response"] = ""
     _write(root, record)
     return {"followup_message": message} if message else {}
 
@@ -55,10 +65,13 @@ def note_red(root: Path, payload: dict) -> None:
 def _open(root: Path, payload: dict) -> dict:
     record = _read(root)
     chat = payload.get("conversation_id")
-    if isinstance(chat, str) and chat and record.get("conversation") != chat:
+    if not isinstance(chat, str) or not chat:
+        return record
+    previous = record.get("conversation")
+    # Cloud stop carries the chat id. The prompt and reply hooks often do not.
+    if isinstance(previous, str) and previous and previous != chat:
         return {"conversation": chat}
-    if isinstance(chat, str) and chat:
-        record["conversation"] = chat
+    record["conversation"] = chat
     return record
 
 
@@ -77,11 +90,22 @@ def _write(root: Path, record: dict) -> None:
 
 
 def _kind(prompt: object) -> str:
+    """A slash command on its own line. Otherwise the first skill name in the text."""
     text = prompt.lower() if isinstance(prompt, str) else ""
-    if "speckit-implement" in text or "speckit.implement" in text:
-        return "implement"
-    if "speckit-converge" in text or "speckit.converge" in text:
-        return "converge"
+    invoked = [name for name in (_line_command(line) for line in text.splitlines()) if name]
+    if invoked:
+        return invoked[-1]
+    found = [(text.find(token), name) for token, name in _COMMANDS if token.strip("/") in text]
+    return min(found)[1] if found else ""
+
+
+def _line_command(line: str) -> str:
+    text = line.strip()
+    if len(text) >= 2 and text[0] == text[-1] == "`":
+        text = text[1:-1].strip()
+    for command, name in _COMMANDS:
+        if text == command or text.startswith(command + " "):
+            return name
     return ""
 
 
