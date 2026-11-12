@@ -29,6 +29,7 @@ RULE = ["always run", "cur-kit-writer", "up to twelve", "more when the job is la
         "specify workflow run .cursor/cur-kit/workflow.yml", "spec.md", "plan.md",
         "research.md", "tasks.md", "checklists", "changelog.md", ".cursor/cur-kit.json",
         "secrets never go in messages", "one json line", ".cursor/cur-kit/state/slots.jsonl",
+        "linear-board.json", "linear mcp", "pending",
         "does not write application code or tests", "gives every implementation task to cur-kit-writer"]
 R14 = {
     "agents/cur-kit-writer.md": [

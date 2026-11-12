@@ -21,6 +21,7 @@ from curkit.linear_api import (
     write_doc,
     write_issue,
 )
+from curkit.linear_board import queue
 from curkit.linear_map import DONE, build, repo_key, repo_name
 from curkit.state import State
 
@@ -28,9 +29,14 @@ SKILL = Path(".cursor/cur-kit/state/skill.json")
 
 
 def sync(root: Path, result: dict, transport=None) -> None:
-    """Mirror root to Linear. Missing config is a no-op. Other failures are logged."""
+    """Mirror root to Linear. A missing team is a no-op. Other failures are logged."""
     try:
-        _push(root, result, transport)
+        team = _team(root)
+        keyed = bool(os.environ.get("LINEAR_API_KEY", "").strip())
+        if team and not keyed:
+            queue(root, result, team)
+        elif team:
+            _push(root, result, transport)
     except Exception as exc:  # noqa: BLE001 - the stop hook must still answer
         State(root).log({"at": check.now(), "error": f"Linear: {type(exc).__name__}: {exc}"})
 
