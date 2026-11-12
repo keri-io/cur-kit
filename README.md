@@ -100,6 +100,7 @@ Set `test` to the real suite. Spec Kit has no test command. While `test` is empt
 | `junit` | `""` | The JUnit XML report the test command writes, as a path inside the project. |
 | `timeout` | `300` | Seconds before a command is killed, with its whole process group. At most 850. |
 | `cache` | `true` | Reuse the last result when nothing changed. |
+| `linear.team` | unset | Linear team key, such as `ENG`. The mirror runs only when this and `LINEAR_API_KEY` are both set. |
 
 Commands run through the shell in the project root. They are the project's own commands, and they get your
 environment unchanged. Put a coverage floor in the test command, like `--cov-fail-under=80`.
@@ -111,7 +112,7 @@ come from the lines of the failing commands' output that mention "fail" or "erro
 skipped.
 
 A `timeout` above 850 is lowered to 850, so a run ends before the stop hook's own 900-second limit. Unknown keys are
-ignored.
+ignored by the check. `linear.team` is read only by the Linear mirror.
 
 If you write `.cursor/cur-kit.json` by hand instead of with `cur-kit --here`, add `.cursor/cur-kit/state/` to
 `.gitignore` yourself. cur-kit rewrites the files in that folder on every run.
@@ -236,6 +237,42 @@ If you're implementing a task, fix this before marking it done. If this was a sp
 
 Each check is appended to `.cursor/cur-kit/state/runs.jsonl`. Both hooks always exit 0 and print JSON. An internal
 error returns `{}`.
+
+## Linear
+
+Set `LINEAR_API_KEY` in the environment and `linear.team` in `.cursor/cur-kit.json` to the team key, such as `ENG`.
+Every completed stop then mirrors the repo to one Linear project. `cur-kit linear sync` runs that same pass. The key
+stays in the environment and is never written to the config file. If either value is missing, the mirror does nothing
+and the stop hook still returns its follow-up. Spec Kit skills and `.specify/` are not edited.
+
+One git repository is one project. cur-kit finds it by the description `cur-kit:` plus the `origin` URL, or plus the
+folder name when there is no remote. Leave that description in place. The project name is the repository name.
+
+`tasks.md` and the feature markdown stay the files the stop hook reads. Linear is the board.
+
+| On the board | Status |
+| --- | --- |
+| A spec, plan, research note, constitution, checklist, or task with no file or task line yet | Backlog |
+| An unchecked task in the active `tasks.md` | Todo |
+| The skill that is running, the next skill this stop will submit, and open tasks during `/speckit-implement` | In Progress |
+| A checked task, or a written spec, plan, or checklist | In Review |
+| Those In Review items after `/speckit-converge` says the work is finished and the suite is not red | Done |
+| A task id gone from `tasks.md`, or a box that is neither empty nor `x` | Canceled |
+| A second issue with the same key (`T014`, or `Specification` for the spec) | Duplicate of the older issue |
+
+Finished means the converge reply contains `converged`, `no further implement`, or `implementation is complete`. That
+pass also sets the Linear project to Completed.
+
+Priority is Urgent for a constitution breach or a CRITICAL finding, High for the first user story or a HIGH finding,
+Medium for the spec, the plan, the constitution, and later stories, and Low for research, checklists, and LOW findings.
+
+In Progress and In Review issues join the team's current cycle when it has one. Backlog and Todo stay out of the cycle.
+cur-kit does not create a cycle. Issues sit on the Specify, Plan, Tasks, Implement, or Converge milestone. The full
+markdown of the spec, plan, research, constitution, each checklist, and the latest convergence findings is a project
+document; the issue keeps the first line and links to it. Story ids and `convergence` are labels. Each sync posts a
+project update: on track when the suite is green or not configured, at risk when it is red.
+
+A Linear error is appended to `runs.jsonl`. It does not change the hook's answer.
 
 ## Agent files
 

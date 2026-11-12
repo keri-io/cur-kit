@@ -6,7 +6,7 @@ import contextlib
 import os
 from pathlib import Path
 
-from curkit import check, config, followup, skill_loop
+from curkit import check, config, followup, linear_sync, skill_loop
 from curkit.hook_latch import judge
 from curkit.project_hooks import has_project_stop
 from curkit.state import State, failure_print
@@ -42,6 +42,7 @@ def _stop(payload: dict, user: bool = False) -> dict:
     if _quiet(payload, root, user):
         return {}
     result, state = check.run_check(root), State(root)
+    linear_sync.sync(root, result)
     if not result["red"]:
         state.clear_latch()
         return skill_loop.after_green(root, payload)
