@@ -5,8 +5,9 @@ command, cur-kit runs the suite after every completed agent turn. A red result c
 message.
 
 Spec Kit stays an upgradable dependency. cur-kit never edits `.specify/` or `.cursor/skills/speckit-*`. After
-`/speckit-implement`, the stop hook submits `/speckit-converge`. If that reply names `/speckit-implement` and does
-not say the work is finished, the next stop submits implement. `specify workflow` still runs the same loop headless.
+`/speckit-implement`, the stop hook submits `/speckit-converge`. The next stop submits implement when that turn
+appended a new open task, or when the reply names `/speckit-implement` and does not say the work is finished.
+`specify workflow` still runs the same loop headless.
 Subagents get their model from agent files in the project's `.cursor/agents/`.
 
 ## Requirements
@@ -169,12 +170,16 @@ repeats while a task is open or the check is red, at most 3 times. Then a gate a
 done, implement, clarify, or plan.
 
 In a chat, the stop hook does the same handoff. A green `/speckit-implement` turn submits `/speckit-converge`.
-A red suite still comes back first, and converge waits until a later stop is green. A converge reply submits
-`/speckit-implement` only when it names that command and does not say the work is finished (`converged`,
-`no further implement`, or `implementation is complete`). A reply that never names the command ends the loop. The stock Spec Kit skills are not edited. A converge
-prompt that also mentions implement in a sentence stays a converge turn. Cloud often sends the chat id only on
-stop, and it may skip the prompt hook for a follow-up. cur-kit keeps that turn and remembers the command it just
-submitted.
+A red suite still comes back first, and converge waits until a later stop is green. cur-kit stores the open task
+ids when that converge prompt is recorded and again when stop submits `/speckit-converge`, because the prompt hook
+is often skipped. A new open task id since that snapshot submits `/speckit-implement` even when the reply is empty,
+only paraphrases the work, or says the work converged. Checking off an old task is not new work. With no new id,
+the reply submits implement when it names that command and does not say the work is finished (`no further
+implement`, `implementation is complete`, or `converged`). A negated phrase such as `not converged` does not finish
+the loop. A reply that never names the command and adds no task ends the loop. The stock Spec Kit skills are not
+edited. A converge prompt that also mentions implement in a sentence stays a converge turn. Cloud often sends the
+chat id only on stop, and it may skip the prompt hook for a follow-up. cur-kit keeps that turn and remembers the
+command it just submitted.
 
 Each step is a headless `cursor-agent` run, so run the loop on a branch or in a worktree. The check step calls
 `cur-kit` from PATH, so `~/.local/bin` must be on PATH. To see the steps without running them:

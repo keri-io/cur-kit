@@ -290,15 +290,20 @@ Quality (everyone):
    `.cursor/hooks.json` already has a cur-kit stop command (the command contains `cur-kit` and ends in `stop` or
    `stop --user`).
 2. `result = run_check(root)`. Not red: `State.clear_latch()`, then a skill follow-up or `{}`. Implement, or a
-   green stop while converge is still owed after a red implement, submits `/speckit-converge`. Converge submits
-   `/speckit-implement` only when the saved assistant text names `speckit-implement` or `speckit.implement` and does
-   not say the work is finished (`converged`, `no further implement`, `implementation is complete`). Red implement
-   keeps the suite follow-up and sets that debt. `beforeSubmitPrompt` stores the prompt and `afterAgentResponse`
-   stores the reply in `.cursor/cur-kit/state/skill.json`. A slash command on its own line decides the turn. A
-   mention of the other command inside a sentence does not. Stock Spec Kit text does that, so the skills stay
-   unchanged. Cloud often puts `conversation_id` only on `stop`. A missing id is filled in without dropping the
-   stored turn. A different id starts a new turn. The submitted follow-up is stored as the next prompt, because
-   the prompt hook is often skipped for that message.
+   green stop while converge is still owed after a red implement, submits `/speckit-converge`. Open task ids are
+   snapshotted when `beforeSubmitPrompt` records a converge prompt and when stop submits `/speckit-converge`,
+   because the prompt hook is often skipped. Converge submits `/speckit-implement` when a new open task id appeared
+   in `tasks.md` since that snapshot, even if the saved reply is empty, never names the command, or says the work
+   converged. Checking off an old task is not new work. With no new id, converge submits `/speckit-implement` only
+   when the saved assistant text names `speckit-implement` or `speckit.implement` and does not say the work is
+   finished (`no further implement`, `implementation is complete`, or `converged`). A negated phrase such as
+   `not converged` or `never converged` does not finish the loop. Red implement keeps the suite follow-up and sets
+   that debt. `beforeSubmitPrompt` stores the prompt and `afterAgentResponse` stores the reply in
+   `.cursor/cur-kit/state/skill.json`. A slash command on its own line decides the turn. A mention of the other
+   command inside a sentence does not. Stock Spec Kit text does that, so the skills stay unchanged. Cloud often
+   puts `conversation_id` only on `stop`. A missing id is filled in without dropping the stored turn. A different
+   id starts a new turn. The submitted follow-up is stored as the next prompt, because the prompt hook is often
+   skipped for that message.
 3. `failure = state.failure_print(result["failing"], output)` where `output` joins the failing outcomes' output; when the
    commands passed but `guard` has entries, use `state.failure_print(["guard: " + g for g in guard], "")`.
 4. A non-empty `conversation_id` that differs from the one stored on the latch resets the count first. Then
