@@ -287,7 +287,11 @@ Quality (everyone):
    `/speckit-implement` only when the saved assistant text names `speckit-implement` or `speckit.implement` and does
    not say the work is finished (`converged`, `no further implement`, `implementation is complete`). Red implement
    keeps the suite follow-up and sets that debt. `beforeSubmitPrompt` stores the prompt and `afterAgentResponse`
-   stores the reply in `.cursor/cur-kit/state/skill.json`.
+   stores the reply in `.cursor/cur-kit/state/skill.json`. A slash command on its own line decides the turn. A
+   mention of the other command inside a sentence does not. Stock Spec Kit text does that, so the skills stay
+   unchanged. Cloud often puts `conversation_id` only on `stop`. A missing id is filled in without dropping the
+   stored turn. A different id starts a new turn. The submitted follow-up is stored as the next prompt, because
+   the prompt hook is often skipped for that message.
 3. `failure = state.failure_print(result["failing"], output)` where `output` joins the failing outcomes' output; when the
    commands passed but `guard` has entries, use `state.failure_print(["guard: " + g for g in guard], "")`.
 4. A non-empty `conversation_id` that differs from the one stored on the latch resets the count first. Then

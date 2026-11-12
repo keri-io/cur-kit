@@ -19,6 +19,9 @@ All notable changes to this project are documented here. The format follows Keep
 
 ### Changed
 
+- The implement and converge loop tolerates an unmodified Spec Kit install on Cursor Cloud. A chat id that arrives
+  only on `stop` no longer drops the turn, a converge prompt that mentions implement in a sentence stays a converge
+  turn, and a follow-up is remembered when the prompt hook is skipped.
 - After `/speckit-implement`, a green stop submits `/speckit-converge`. If that reply names implement and does not
   say the work is finished, the next stop submits `/speckit-implement`. A red suite still comes back first.
 - `cur-kit --here` merges a project `stop` and `sessionStart` hook into `.cursor/hooks.json` and writes
