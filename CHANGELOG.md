@@ -6,9 +6,9 @@ All notable changes to this project are documented here. The format follows Keep
 
 ### Added
 
-- A Linear mirror of the repo. With `linear.team` in `.cursor/cur-kit.json` and `LINEAR_API_KEY` in the environment,
-  the stop hook and `cur-kit linear sync` publish spec, plan, tasks, checklists, and convergence findings to one
-  project per git repo. The API key is never stored in the config. Spec Kit skills stay untouched.
+- A Linear mirror of the repo. The stop hook writes `linear-board.json` and the Cursor Linear MCP applies it on
+  the next turn. A personal account needs no team key. `LINEAR_API_KEY` remains an optional direct path. Spec Kit
+  skills stay untouched.
 - Project skeleton, build spec in `docs/spec.md`, and the quality gate checker in `scripts/gates.py`.
 - Parsing engine: scenario keys (`ids`), Spec Kit tasks (`tasks`), JUnit reports (`junit`), the check-off guard
   (`guard`), and follow-up text (`followup`).

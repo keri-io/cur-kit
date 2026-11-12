@@ -130,7 +130,7 @@ def on_session_start(payload: dict) -> dict: ...
 
 # curkit/linear_sync.py
 def sync(root: Path, result: dict, transport=None) -> None: ...
-# No-op without LINEAR_API_KEY or linear.team. Other failures are logged and not raised.
+# Without LINEAR_API_KEY, writes linear-board.json. An empty team means the MCP picks the personal team.
 # One repo is one project, keyed by the origin URL (or the folder name). The stop hook calls
 # sync after the suite result is known and before the skill follow-up.
 ```

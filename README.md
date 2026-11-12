@@ -100,7 +100,7 @@ Set `test` to the real suite. Spec Kit has no test command. While `test` is empt
 | `junit` | `""` | The JUnit XML report the test command writes, as a path inside the project. |
 | `timeout` | `300` | Seconds before a command is killed, with its whole process group. At most 850. |
 | `cache` | `true` | Reuse the last result when nothing changed. |
-| `linear.team` | unset | Linear team key, such as `ENG`. The mirror runs only when this and `LINEAR_API_KEY` are both set. |
+| `linear.team` | unset | Optional Linear team key. A personal workspace needs no key: the MCP uses your only team, or the one created first when you belong to several. |
 
 Commands run through the shell in the project root. They are the project's own commands, and they get your
 environment unchanged. Put a coverage floor in the test command, like `--cov-fail-under=80`.
@@ -240,10 +240,12 @@ error returns `{}`.
 
 ## Linear
 
-Set `LINEAR_API_KEY` in the environment and `linear.team` in `.cursor/cur-kit.json` to the team key, such as `ENG`.
-Every completed stop then mirrors the repo to one Linear project. `cur-kit linear sync` runs that same pass. The key
-stays in the environment and is never written to the config file. If either value is missing, the mirror does nothing
-and the stop hook still returns its follow-up. Spec Kit skills and `.specify/` are not edited.
+A personal Linear account is enough. Every completed stop writes `.cursor/cur-kit/state/linear-board.json`.
+On the next turn, if the Linear MCP is connected, the agent applies that board before other work. Cursor Cloud with
+the Linear plugin connected is enough. No API key and no team key are required. The MCP uses your only team, or the
+one created first when you belong to several. Set `linear.team` to a team key, such as `ENG`, when you want a
+different one. If `LINEAR_API_KEY` and `linear.team` are both set, the stop hook publishes directly instead.
+The stop hook still returns its follow-up. Spec Kit skills and `.specify/` are not edited.
 
 One git repository is one project. cur-kit finds it by the description `cur-kit:` plus the `origin` URL, or plus the
 folder name when there is no remote. Leave that description in place. The project name is the repository name.

@@ -84,16 +84,25 @@ def created(title):
     return made
 
 
-def test_a_missing_key_or_team_does_not_call_linear(tmp_path, monkeypatch):
+def test_a_missing_key_queues_the_mcp_board_and_a_missing_team_does_nothing(tmp_path, monkeypatch):
     root = make_project(tmp_path)
     board.calls = []
-    monkeypatch.setenv("LINEAR_API_KEY", "lin_test")
     sync(root, {"red": False}, board)
-    assert board.calls == []
+    path = root / ".cursor/cur-kit/state/linear-board.json"
+    assert board.calls == [] and json.loads(path.read_text(encoding="utf-8"))["team"] == ""
     enable(root, monkeypatch)
     monkeypatch.delenv("LINEAR_API_KEY")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({"issues": [{"key": "T099"}]}), encoding="utf-8")
+    feature = root / "specs" / "001-login"
+    feature.mkdir(parents=True)
+    write(feature, "tasks.md", "- [ ] T014 [US1] Implement login\n")
+    write(root, ".cursor/cur-kit/state/skill.json", json.dumps({"prompt": "/speckit-implement"}))
     sync(root, {"red": False}, board)
-    assert board.calls == []
+    saved = json.loads(path.read_text(encoding="utf-8"))
+    task = next(item for item in saved["issues"] if item["key"] == "T014")
+    assert board.calls == [] and saved["via"] == "linear-mcp" and saved["removedTasks"] == ["T099"]
+    assert task["state"] == "In Progress" and task["cycle"] is True and saved["health"] == "onTrack"
 
 
 def test_open_work_joins_the_cycle_and_backlog_stays_out(tmp_path, monkeypatch):
