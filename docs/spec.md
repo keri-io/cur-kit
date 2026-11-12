@@ -19,8 +19,10 @@ Children get their model from project agent files.
 - Config is `.cursor/cur-kit.json`, not `.cursor/bootstrap.json`. State is `.cursor/cur-kit/state/`, not `.cursor/bootstrap/`.
   The old cursor-bootstrap hooks read those paths. Separate names mean the two packs never double-run a suite.
 - The converge loop workflow file lives at `.cursor/cur-kit/workflow.yml`.
-- Deferred to a later version: the `subagentStart` writer cap (its payload is unverified), project-level hooks for cloud,
-  and the compaction checkpoint (the existing pack still provides it). v0 reports unplanned files instead of blocking.
+- Project hooks are `.cursor/hooks.json` plus `.cursor/hooks/cur-kit`. Cloud agents load that file and run `stop`.
+  They do not load `~/.cursor/hooks.json` and do not run `sessionStart`, so a new non-empty `conversation_id` resets
+  the red latch. Deferred: the `subagentStart` writer cap (its payload is unverified) and the compaction checkpoint
+  (the existing pack still provides it). v0 reports unplanned files instead of blocking.
 
 ## Layout and ownership
 
@@ -197,8 +199,10 @@ Installer (Opus B):
   `specify init --here --integration cursor-agent --non-interactive`. In a non-empty directory without `.specify/` it adds
   `--force`. When `specify` is not on PATH it raises `SeedError` with an install hint.
 - AC-13 `seed` writes only files that are missing and never overwrites: `.cursor/cur-kit.json` (with `detect_test`),
-  the five agent files, `.cursor/rules/cur-kit.mdc`, `.cursor/cur-kit/workflow.yml`. It appends
-  `.cursor/cur-kit/state/` to `.gitignore` once. It never touches `.specify/` or `.cursor/skills/`.
+  the five agent files, `.cursor/rules/cur-kit.mdc`, `.cursor/cur-kit/workflow.yml`, and `.cursor/hooks/cur-kit`.
+  It merges `stop` and `sessionStart` into `.cursor/hooks.json` (the wrapper command, timeout 900 and loop_limit 25
+  on stop, timeout 10 on sessionStart) and keeps every other entry. It appends `.cursor/cur-kit/state/` to
+  `.gitignore` once. It never touches `.specify/` or `.cursor/skills/`.
 - AC-14 Agent files: `cur-kit-scout`, `cur-kit-writer`, `cur-kit-witness` use `model: composer-2.5`; `cur-kit-reviewer`
   uses `model: grok-4.7[effort=xhigh,context=500k]`; `cur-kit-diagnose` uses `model: grok-4.7-medium`. Each has `name`, `description`,
   `model` frontmatter. Scout, witness, reviewer, and diagnose say they are read-only. The writer says: one task, only its
@@ -214,9 +218,11 @@ Installer (Opus B):
   `requires.speckit_version: ">=1.0.13"`. `specify workflow add <file>` (with a `.specify/` folder present) validates it.
   Found in wave 1: without `on_reject: skip` the validator rejects the gate, and without the integration input the
   command steps can't start the agent.
-- AC-16 `install_hooks` merges into `HOME/.cursor/hooks.json`: `stop` runs `<command> hook stop` (timeout 900,
+- AC-16 `install_hooks` merges into `HOME/.cursor/hooks.json`: `stop` runs `<command> hook stop --user` (timeout 900,
   loop_limit 25) and `sessionStart` runs `<command> hook session-start` (timeout 10). It is idempotent, keeps every other
-  entry, and creates the file if missing. `link_bin` symlinks `HOME/.local/bin/cur-kit` to the target.
+  entry, and creates the file if missing. An older cur-kit `hook stop` without `--user` is replaced. `link_bin`
+  symlinks `HOME/.local/bin/cur-kit` to the target. `--user` returns `{}` without running the suite when the project
+  `.cursor/hooks.json` already has a cur-kit stop command.
 - The rule `.cursor/rules/cur-kit.mdc` (`alwaysApply: true`) states the contract: Always Run; the parent plans and
   children write through `cur-kit-writer`, at most two at once on separate files; test names cite `FR-###`, `SC-###`,
   `USn`, `USn/ACn`; nothing is marked `[x]` while red or before the reviewer matched the scenario to the test; hooks never
@@ -272,12 +278,16 @@ Quality (everyone):
 `on_stop(payload)`:
 
 1. `status` other than `completed`, or `loop_count >= followup.MAX_LOOPS`: `{}`. Not a cur-kit project
-   (`config.load(project_root(payload))` is `None`): `{}`.
+   (`config.load(project_root(payload))` is `None`): `{}`. `cur-kit hook stop --user` is also `{}` when the project's
+   `.cursor/hooks.json` already has a cur-kit stop command (the command contains `cur-kit` and ends in `stop` or
+   `stop --user`).
 2. `result = run_check(root)`. Not red: `State.clear_latch()`, `{}`.
 3. `failure = state.failure_print(result["failing"], output)` where `output` joins the failing outcomes' output; when the
    commands passed but `guard` has entries, use `state.failure_print(["guard: " + g for g in guard], "")`.
-4. `report, latch = state.should_report(State.latch(), failure)`; save the latch. Report only when allowed, with
-   `repeat = latch["count"] == 2`. The count keeps rising after 2, so use equality.
+4. A non-empty `conversation_id` that differs from the one stored on the latch resets the count first. Then
+   `report, latch = state.should_report(...)`; save the latch, including that `conversation` id when there is one.
+   Report only when allowed, with `repeat = latch["count"] == 2`. The count keeps rising after 2, so use equality.
+   An empty `conversation_id` leaves the latch's chat as it was.
 5. Any exception: return `{}` and append `{"at", "error"}` to the run log if the state folder can be written.
 
 `project_root(payload)`: `CURSOR_PROJECT_DIR` when set, else the first entry of `payload["workspace_roots"]`, else the
@@ -285,7 +295,8 @@ current directory.
 
 CLI: `cur-kit --here` catches `here.SeedError` (print the message, exit 1). `cur-kit install [--home DIR]` catches
 `install.InstallError` (exit 1); it passes the absolute path of `bin/cur-kit` to `install_hooks` and `link_bin`.
-`cur-kit hook <stop|session-start>` reads JSON from stdin, prints JSON, and always exits 0.
+`cur-kit hook <stop|session-start>` reads JSON from stdin, prints JSON, and always exits 0. `hook stop` accepts
+`--user`.
 
 ## Review round (Fable B findings, accepted)
 

@@ -29,7 +29,7 @@ def parser() -> argparse.ArgumentParser:
 def main(argv: list[str] | None = None) -> int:
     args = sys.argv[1:] if argv is None else argv
     if args[:1] == ["hook"]:
-        return hook(args[1:2])
+        return hook(args[1:])
     top = parser()
     opts = top.parse_args(args)
     if opts.here:
@@ -46,15 +46,23 @@ def main(argv: list[str] | None = None) -> int:
 
 def hook(args: list[str]) -> int:
     """Print one JSON object for the hook named in args and exit 0, whatever stdin holds."""
-    handlers = {"stop": hooks.on_stop, "session-start": hooks.on_session_start}
     try:
         payload = json.loads(sys.stdin.read() or "{}")
-        handler = handlers.get(args[0]) if args else None
-        text = json.dumps(handler(payload if isinstance(payload, dict) else {}) if handler else {})
+        body = payload if isinstance(payload, dict) else {}
+        text = json.dumps(_dispatch(args, body))
     except Exception:  # noqa: BLE001 - a hook must always answer with JSON
         text = "{}"
     print(text)
     return 0
+
+
+def _dispatch(args: list[str], payload: dict) -> dict:
+    name = args[0] if args else ""
+    if name == "stop":
+        return hooks.on_stop(payload, user="--user" in args[1:])
+    if name == "session-start":
+        return hooks.on_session_start(payload)
+    return {}
 
 
 def checked(root: Path) -> dict:

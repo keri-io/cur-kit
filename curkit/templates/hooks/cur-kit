@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Project hook. Cloud agents run this from the repository root.
+set -euo pipefail
+event="${1:?}"
+here="${BASH_SOURCE[0]%/*}"
+root="$(cd "$here/../.." && pwd)"
+if [[ -x "$root/bin/cur-kit" ]]; then
+  exec "$root/bin/cur-kit" hook "$event"
+fi
+if command -v cur-kit >/dev/null 2>&1; then
+  exec cur-kit hook "$event"
+fi
+echo "cur-kit: hook command not found" >&2
+exit 127

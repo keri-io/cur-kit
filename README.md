@@ -23,8 +23,11 @@ bin/cur-kit install
 
 This changes `~/.cursor/hooks.json`. It adds two user hooks and keeps every other entry:
 
-- `stop` runs `<repo>/bin/cur-kit hook stop`, with `timeout` 900 and `loop_limit` 25.
+- `stop` runs `<repo>/bin/cur-kit hook stop --user`, with `timeout` 900 and `loop_limit` 25.
 - `sessionStart` runs `<repo>/bin/cur-kit hook session-start`, with `timeout` 10.
+
+`--user` stays quiet when the project already has a cur-kit `stop` hook, so the suite runs once. Cloud agents never
+load `~/.cursor/hooks.json`. They run the project file `.cursor/hooks.json`, which `cur-kit --here` writes.
 
 An older cur-kit entry for the same event, for example from another checkout, is replaced rather than kept beside the
 new one. It also links `~/.local/bin/cur-kit` to `bin/cur-kit`. Running it again changes nothing. `--home DIR`
@@ -54,6 +57,7 @@ cur-kit --here
 - `specify` is not on PATH: it exits 1 and prints the install command.
 
 Then it writes these files. It writes a file only when it is missing and never overwrites one.
+`.cursor/hooks.json` is the exception: cur-kit merges its entries and keeps every other hook.
 
 - `.cursor/cur-kit.json`, the config. `test` is `python3 -m pytest -q || test $? -eq 5` when there is a `pyproject.toml`,
   `pytest.ini`, or `setup.py`, and `bun test` when `package.json` has a `test` script. Otherwise it is empty. pytest
@@ -62,8 +66,12 @@ Then it writes these files. It writes a file only when it is missing and never o
   `cur-kit-diagnose.md`.
 - `.cursor/rules/cur-kit.mdc`, the always-on rule.
 - `.cursor/cur-kit/workflow.yml`, the converge loop.
+- `.cursor/hooks/cur-kit`, the project hook command, and a `stop` plus `sessionStart` entry in `.cursor/hooks.json`.
+  `stop` runs `bash .cursor/hooks/cur-kit stop` with `timeout` 900 and `loop_limit` 25. Cloud agents load this file.
+  `sessionStart` is for the desktop app and for self-hosted workers. Managed cloud agents do not send that step.
 
-It also adds `.cursor/cur-kit/state/` to `.gitignore`, once.
+It also adds `.cursor/cur-kit/state/` to `.gitignore`, once. If `.cursor/hooks.json` is not valid JSON, `--here` exits 1
+and leaves that file alone.
 
 Set `test` to the real suite. Spec Kit has no test command. While `test` is empty, nothing runs.
 
@@ -186,7 +194,9 @@ Cursor runs `cur-kit hook stop` when an agent turn ends.
    of the output when there are no names. The second report says the same failure came back after a change, or
    that it is still there and nothing changed. Either way it tells the agent to stop and tell you if it can't fix
    it. After that the hook returns `{}` until the failure changes, a run is green, or a new chat starts.
-   `sessionStart` clears the latch. The latch only compares a failure with the one before it, so a suite that
+   `sessionStart` clears the latch. A stop whose `conversation_id` is a new non-empty string does too, which is how a
+   new cloud chat is heard: managed cloud agents do not run `sessionStart`. An empty `conversation_id` changes nothing.
+   The latch only compares a failure with the one before it, so a suite that
    alternates between two failures is reported every time, until `loop_count` reaches 25.
 7. Follow-up. A reported failure returns `{"followup_message": "..."}`. It names the failing tests, the scenario ids
    with the tasks that cite them, each failing command with up to the last 30 lines of its output, and the guard
@@ -244,9 +254,11 @@ cur-kit started as a plan page for Always Run. v0.1.0 differs from it on purpose
 - The workflow file is `.cursor/cur-kit/workflow.yml`. It adds an `integration` input, default `auto`, to both command
   steps, and `on_reject: skip` to the gate. Without them, Spec Kit's validator rejects the gate and the command steps
   cannot start the agent. The check step gets 900 seconds instead of the engine's default 300.
-- Deferred to a later version: the `subagentStart` cap on writers, because its payload is unverified; project-level
-  hooks for cloud agents; and the compaction checkpoint, which cursor-bootstrap still provides. Until then, cur-kit
-  lists unplanned files instead of blocking a writer.
+- Project hooks live in `.cursor/hooks.json`. Cursor Cloud loads that file and runs `stop`. It does not load
+  `~/.cursor/hooks.json`, and it does not run `sessionStart`. The red latch therefore resets when `conversation_id`
+  changes. Deferred to a later version: the `subagentStart` cap on writers, because its payload is unverified, and the
+  compaction checkpoint, which cursor-bootstrap still provides. Until then, cur-kit lists unplanned files instead of
+  blocking a writer.
 
 ## Development
 

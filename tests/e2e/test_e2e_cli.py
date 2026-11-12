@@ -33,7 +33,7 @@ def test_ac21_install_writes_the_hooks_and_the_link_into_the_given_home(kit, tmp
     done = kit.run("install", "--home", str(target))
     assert done.returncode == 0, f"stdout:\n{done.stdout}\nstderr:\n{done.stderr}"
     hooks = json.loads((target / ".cursor" / "hooks.json").read_text(encoding="utf-8"))["hooks"]
-    assert hooks["stop"] == [{"command": f"{COMMAND} hook stop", "timeout": 900, "loop_limit": 25}]
+    assert hooks["stop"] == [{"command": f"{COMMAND} hook stop --user", "timeout": 900, "loop_limit": 25}]
     assert hooks["sessionStart"] == [{"command": f"{COMMAND} hook session-start", "timeout": 10}]
     assert os.path.samefile(target / ".local" / "bin" / "cur-kit", BIN)
     assert list(Path(kit.env["HOME"]).iterdir()) == []

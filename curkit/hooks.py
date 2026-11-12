@@ -7,7 +7,9 @@ import os
 from pathlib import Path
 
 from curkit import check, config, followup
-from curkit.state import State, failure_print, should_report
+from curkit.hook_latch import judge
+from curkit.project_hooks import has_project_stop
+from curkit.state import State, failure_print
 
 
 def project_root(payload: dict) -> Path:
@@ -20,10 +22,10 @@ def project_root(payload: dict) -> Path:
     return Path(first) if isinstance(first, str) and first.strip() else Path.cwd()
 
 
-def on_stop(payload: dict) -> dict:
+def on_stop(payload: dict, user: bool = False) -> dict:
     """A follow-up while the suite is red, as the latch allows. `{}` otherwise, and on any internal error."""
     try:
-        return _stop(payload)
+        return _stop(payload, user)
     except Exception as exc:  # noqa: BLE001 - a hook must always answer with JSON
         _log_error(payload, exc)
         return {}
@@ -35,22 +37,28 @@ def on_session_start(payload: dict) -> dict:
     return {}
 
 
-def _stop(payload: dict) -> dict:
-    loops = _loops(payload)
-    if payload.get("status") != "completed" or loops >= followup.MAX_LOOPS:
-        return {}
+def _stop(payload: dict, user: bool = False) -> dict:
     root = project_root(payload)
-    if config.load(root) is None:
+    if _quiet(payload, root, user):
         return {}
     result, state = check.run_check(root), State(root)
     if not result["red"]:
         state.clear_latch()
         return {}
-    report, latch = should_report(state.latch(), _failure(result))
+    loops = _loops(payload)
+    report, latch = judge(state, payload, _failure(result))
     state.save_latch(latch)
     if not report:
         return {}
     return {"followup_message": followup.compose(result, loops, latch["count"] == 2)}
+
+
+def _quiet(payload: dict, root: Path, user: bool) -> bool:
+    if payload.get("status") != "completed" or _loops(payload) >= followup.MAX_LOOPS:
+        return True
+    if user and has_project_stop(root):
+        return True
+    return config.load(root) is None
 
 
 def _loops(payload: dict) -> int:

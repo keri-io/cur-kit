@@ -65,19 +65,19 @@ def test_ac21_bin_cur_kit_works_through_a_symlink_from_another_directory(tmp_pat
     assert (version.returncode, version.stdout.strip()) == (0, VERSION), version.stderr
     assert cli(elsewhere, "install", "--home", str(tmp_path / "h"), exe=chained).returncode == 0
     hooks = json.loads((tmp_path / "h" / ".cursor" / "hooks.json").read_text())["hooks"]
-    assert hooks["stop"][0]["command"] == f"{BIN} hook stop"
+    assert hooks["stop"][0]["command"] == f"{BIN} hook stop --user"
 
 
 def test_ac21_install_installs_the_hooks_and_the_bin_link(tmp_path, capsys):
     home = tmp_path / "custom"
     assert main(["install", "--home", str(home)]) == 0
     hooks = json.loads((home / ".cursor" / "hooks.json").read_text())["hooks"]
-    assert hooks["stop"] == [{"command": f"{BIN} hook stop", "timeout": 900, "loop_limit": 25}]
+    assert hooks["stop"] == [{"command": f"{BIN} hook stop --user", "timeout": 900, "loop_limit": 25}]
     assert hooks["sessionStart"] == [{"command": f"{BIN} hook session-start", "timeout": 10}]
     link = home / ".local" / "bin" / "cur-kit"
     assert link.is_symlink() and link.readlink() == BIN
     lines = capsys.readouterr().out.splitlines()
-    assert lines == [f"add stop hook: {BIN} hook stop", f"add sessionStart hook: {BIN} hook session-start",
+    assert lines == [f"add stop hook: {BIN} hook stop --user", f"add sessionStart hook: {BIN} hook session-start",
                      f"link {link} -> {BIN}"]
 
 

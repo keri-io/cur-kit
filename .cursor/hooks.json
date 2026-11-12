@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "stop": [
+      {
+        "command": "bash .cursor/hooks/cur-kit stop",
+        "timeout": 900,
+        "loop_limit": 25
+      }
+    ],
+    "sessionStart": [
+      {
+        "command": "bash .cursor/hooks/cur-kit session-start",
+        "timeout": 10
+      }
+    ]
+  }
+}
