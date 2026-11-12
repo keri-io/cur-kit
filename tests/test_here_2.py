@@ -7,12 +7,14 @@ import pytest
 import curkit
 from curkit import config
 from curkit.here import seed
+from curkit.project_hooks import START_COMMAND, STOP_COMMAND, WRAPPER
 
 TEMPLATES = Path(curkit.__file__).parent / "templates"
 AGENTS = ["scout", "writer", "witness", "reviewer", "diagnose"]
 COPIES = {f".cursor/agents/cur-kit-{name}.md": f"agents/cur-kit-{name}.md" for name in AGENTS}
 COPIES |= {".cursor/rules/cur-kit.mdc": "rules/cur-kit.mdc", ".cursor/cur-kit/workflow.yml": "workflow.yml"}
 STATE = ".cursor/cur-kit/state/"
+HOOKS = [f"add {WRAPPER}", f"add stop hook: {STOP_COMMAND}", f"add sessionStart hook: {START_COMMAND}"]
 
 
 def project(tmp_path):
@@ -34,7 +36,8 @@ def test_ac13_seed_writes_the_config_agents_rule_and_workflow(tmp_path):
     root = project(tmp_path)
     (root / "pyproject.toml").write_text("[project]\nname = 'x'\n", encoding="utf-8")
     log = seed(root, runner=no_run)
-    assert log == ["add .cursor/cur-kit.json", *(f"add {rel}" for rel in COPIES), f"add {STATE} to .gitignore"]
+    assert log == ["add .cursor/cur-kit.json", *(f"add {rel}" for rel in COPIES), *HOOKS, f"add {STATE} to .gitignore"]
+    assert (root / WRAPPER).read_bytes() == (TEMPLATES / "hooks" / "cur-kit").read_bytes()
     assert config.load(root) == config.Config(config.PYTEST, "", "", "", 300, True)
     for rel, name in COPIES.items():
         assert (root / rel).read_bytes() == (TEMPLATES / name).read_bytes()

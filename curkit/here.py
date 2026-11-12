@@ -9,6 +9,7 @@ from collections.abc import Callable
 from pathlib import Path
 
 from curkit import config
+from curkit.project_hooks import install_project_hooks
 
 TEMPLATES = Path(__file__).parent / "templates"
 INIT = ["specify", "init", "--here", "--integration", "cursor-agent", "--non-interactive"]
@@ -68,5 +69,6 @@ def seed(root: Path, runner: Callable = subprocess.run) -> list[str]:
     settings = {**config.DEFAULTS, "test": config.detect_test(root)}
     log.append(place(root, config.CONFIG_PATH, (json.dumps(settings, indent=2) + "\n").encode()))
     log.extend(place(root, rel, (TEMPLATES / name).read_bytes()) for rel, name in COPIES)
+    log.extend(install_project_hooks(root))
     log.append(ignore_state(root))
     return log

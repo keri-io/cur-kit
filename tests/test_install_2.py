@@ -21,8 +21,8 @@ def read(home):
 def test_r6_install_hooks_shell_quotes_the_command(tmp_path):
     install_hooks(tmp_path, SPACED)
     hooks = read(tmp_path)
-    assert hooks["stop"][0]["command"] == f"'{SPACED}' hook stop"
-    assert shlex.split(hooks["stop"][0]["command"]) == [SPACED, "hook", "stop"]
+    assert hooks["stop"][0]["command"] == f"'{SPACED}' hook stop --user"
+    assert shlex.split(hooks["stop"][0]["command"]) == [SPACED, "hook", "stop", "--user"]
     assert shlex.split(hooks["sessionStart"][0]["command"]) == [SPACED, "hook", "session-start"]
 
 
@@ -37,10 +37,11 @@ def test_r6_install_hooks_replaces_old_cur_kit_entries_for_the_same_event(tmp_pa
     }}), encoding="utf-8")
     log = install_hooks(tmp_path, SPACED)
     hooks = read(tmp_path)
-    assert hooks["stop"] == [KEEP_A, {"command": f"{QUOTED} hook stop", "timeout": 900, "loop_limit": 25}, KEEP_B, PROMPT]
+    stop = {"command": f"{QUOTED} hook stop --user", "timeout": 900, "loop_limit": 25}
+    assert hooks["stop"] == [KEEP_A, stop, KEEP_B, PROMPT]
     assert hooks["sessionStart"] == [{"command": f"{QUOTED} hook session-start", "timeout": 10}]
     assert hooks["preToolUse"] == [OTHER_EVENT]
-    assert log == [f"replace stop hook: {OLD} hook stop, {SPACED} hook stop -> {QUOTED} hook stop",
+    assert log == [f"replace stop hook: {OLD} hook stop, {SPACED} hook stop -> {QUOTED} hook stop --user",
                    f"replace sessionStart hook: {OLD} hook session-start -> {QUOTED} hook session-start"]
 
 
@@ -50,12 +51,21 @@ def test_r6_install_hooks_stays_idempotent_after_a_replace(tmp_path):
     before = (tmp_path / ".cursor" / "hooks.json").read_bytes()
     log = install_hooks(tmp_path, SPACED)
     assert (tmp_path / ".cursor" / "hooks.json").read_bytes() == before
-    assert log == [f"skip stop hook: {QUOTED} hook stop (exists)",
+    assert log == [f"skip stop hook: {QUOTED} hook stop --user (exists)",
                    f"skip sessionStart hook: {QUOTED} hook session-start (exists)"]
     assert [len(entries) for entries in read(tmp_path).values()] == [1, 1]
 
 
+def test_r6_install_hooks_replaces_a_stop_command_that_has_no_user_flag(tmp_path):
+    path = tmp_path / ".cursor" / "hooks.json"
+    path.parent.mkdir()
+    path.write_text(json.dumps({"version": 1, "hooks": {"stop": [{"command": "cur-kit hook stop"}]}}), encoding="utf-8")
+    install_hooks(tmp_path, "cur-kit")
+    stop = {"command": "cur-kit hook stop --user", "timeout": 900, "loop_limit": 25}
+    assert read(tmp_path)["stop"] == [stop]
+
+
 def test_r6_install_hooks_stays_idempotent_for_a_command_outside_a_bin_directory(tmp_path):
     install_hooks(tmp_path, "cur-kit")
-    assert install_hooks(tmp_path, "cur-kit") == ["skip stop hook: cur-kit hook stop (exists)",
+    assert install_hooks(tmp_path, "cur-kit") == ["skip stop hook: cur-kit hook stop --user (exists)",
                                                   "skip sessionStart hook: cur-kit hook session-start (exists)"]

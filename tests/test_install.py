@@ -7,7 +7,7 @@ import pytest
 from curkit.install import InstallError, install_hooks, link_bin
 
 CMD = "/opt/cur-kit/bin/cur-kit"
-STOP = {"command": f"{CMD} hook stop", "timeout": 900, "loop_limit": 25}
+STOP = {"command": f"{CMD} hook stop --user", "timeout": 900, "loop_limit": 25}
 START = {"command": f"{CMD} hook session-start", "timeout": 10}
 OTHER = {
     "extra": {"keep": True},
@@ -30,7 +30,7 @@ def test_ac16_install_hooks_creates_the_file_when_missing(tmp_path):
     log = install_hooks(tmp_path, CMD)
     data = json.loads(hooks_file(tmp_path).read_text(encoding="utf-8"))
     assert data == {"version": 1, "hooks": {"stop": [STOP], "sessionStart": [START]}}
-    assert log == [f"add stop hook: {CMD} hook stop", f"add sessionStart hook: {CMD} hook session-start"]
+    assert log == [f"add stop hook: {CMD} hook stop --user", f"add sessionStart hook: {CMD} hook session-start"]
 
 
 def test_ac16_install_hooks_keeps_every_other_entry(tmp_path):
@@ -49,7 +49,7 @@ def test_ac16_install_hooks_is_idempotent(tmp_path):
     before = hooks_file(tmp_path).read_bytes()
     log = install_hooks(tmp_path, CMD)
     assert hooks_file(tmp_path).read_bytes() == before
-    assert log == [f"skip stop hook: {CMD} hook stop (exists)",
+    assert log == [f"skip stop hook: {CMD} hook stop --user (exists)",
                    f"skip sessionStart hook: {CMD} hook session-start (exists)"]
 
 
@@ -58,7 +58,7 @@ def test_r6_install_hooks_replaces_an_edited_cur_kit_entry(tmp_path):
     path = hooks_file(tmp_path, json.dumps({"version": 1, "hooks": {"stop": [edited]}}))
     log = install_hooks(tmp_path, CMD)
     assert json.loads(path.read_text(encoding="utf-8"))["hooks"]["stop"] == [STOP]
-    assert log[0] == f"replace stop hook: {CMD} hook stop -> {CMD} hook stop"
+    assert log[0] == f"replace stop hook: {CMD} hook stop --user -> {CMD} hook stop --user"
 
 
 @pytest.mark.parametrize("text", ["{broken", "[]", '{"hooks": []}', '{"hooks": {"stop": {}}}'])

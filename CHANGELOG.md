@@ -19,6 +19,10 @@ All notable changes to this project are documented here. The format follows Keep
 
 ### Changed
 
+- `cur-kit --here` merges a project `stop` and `sessionStart` hook into `.cursor/hooks.json` and writes
+  `.cursor/hooks/cur-kit`, so Cursor Cloud runs the suite. The user-level stop command is `hook stop --user` and stays
+  quiet when that project hook is present. A new non-empty `conversation_id` resets the red latch, because managed
+  cloud agents do not run `sessionStart`.
 - `cur-kit-reviewer` uses Grok 4.7 at extra-high effort with a 500k context window.
 - The check-off guard treats a skipped test as not passing.
 - `keys_in` reads Spec Kit's own wording: `User Story 4 AC1` and `acceptance scenario 1` become `US4/AC1`.

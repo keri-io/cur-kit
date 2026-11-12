@@ -6,7 +6,7 @@ import json
 import shlex
 from pathlib import Path
 
-HOOK_ENDINGS = (" hook stop", " hook session-start")
+HOOK_ENDINGS = (" hook stop", " hook stop --user", " hook session-start")
 
 
 class InstallError(ValueError):
@@ -16,7 +16,7 @@ class InstallError(ValueError):
 def hook_entries(command: str) -> dict[str, dict]:
     program = shlex.quote(command)
     return {
-        "stop": {"command": f"{program} hook stop", "timeout": 900, "loop_limit": 25},
+        "stop": {"command": f"{program} hook stop --user", "timeout": 900, "loop_limit": 25},
         "sessionStart": {"command": f"{program} hook session-start", "timeout": 10},
     }
 
@@ -25,7 +25,8 @@ def is_cur_kit(item: object, command: str) -> bool:
     text = item.get("command") if isinstance(item, dict) else None
     if not isinstance(text, str):
         return False
-    return text == command or ("/bin/cur-kit" in text and text.endswith(HOOK_ENDINGS))
+    same = text.removesuffix(" --user") == command.removesuffix(" --user")
+    return same or ("/bin/cur-kit" in text and text.endswith(HOOK_ENDINGS))
 
 
 def read_hooks(path: Path) -> dict:
