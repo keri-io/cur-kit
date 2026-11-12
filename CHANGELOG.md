@@ -19,6 +19,8 @@ All notable changes to this project are documented here. The format follows Keep
 
 ### Changed
 
+- `cur-kit-scout`, `cur-kit-writer`, and `cur-kit-witness` use Grok 4.7 high. Scouts and writers run up to twelve at
+  once, and more when the job is large.
 - The implement and converge loop tolerates an unmodified Spec Kit install on Cursor Cloud. A chat id that arrives
   only on `stop` no longer drops the turn, a converge prompt that mentions implement in a sentence stays a converge
   turn, and a follow-up is remembered when the prompt hook is skipped.

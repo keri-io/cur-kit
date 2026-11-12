@@ -12,9 +12,9 @@ pytestmark = pytest.mark.skipif(shutil.which("specify") is None, reason="specify
 
 INIT = ["specify", "init", "--here", "--integration", "cursor-agent", "--non-interactive"]
 MODELS = {
-    "scout": "composer-2.5",
-    "writer": "composer-2.5",
-    "witness": "composer-2.5",
+    "scout": "grok-4.7-high",
+    "writer": "grok-4.7-high",
+    "witness": "grok-4.7-high",
     "reviewer": "grok-4.7[effort=xhigh,context=500k]",
     "diagnose": "grok-4.7-medium",
 }

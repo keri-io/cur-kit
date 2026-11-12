@@ -9,9 +9,9 @@ import curkit
 
 TEMPLATES = Path(curkit.__file__).parent / "templates"
 MODELS = {
-    "cur-kit-scout": "composer-2.5",
-    "cur-kit-writer": "composer-2.5",
-    "cur-kit-witness": "composer-2.5",
+    "cur-kit-scout": "grok-4.7-high",
+    "cur-kit-writer": "grok-4.7-high",
+    "cur-kit-witness": "grok-4.7-high",
     "cur-kit-reviewer": "grok-4.7[effort=xhigh,context=500k]",
     "cur-kit-diagnose": "grok-4.7-medium",
 }
@@ -22,7 +22,8 @@ WRITER = ["one task", "its own files", "test first", "named after the scenario k
           "does not write application code or tests itself"]
 REVIEWER = ["read-only", "scenario text", "the spec and the test", "not the writer's transcript",
             "do not run speckit-analyze"]
-RULE = ["always run", "cur-kit-writer", "at most two", "separate files", "fr-###", "sc-###", "usn", "usn/acn",
+RULE = ["always run", "cur-kit-writer", "up to twelve", "more when the job is large", "separate files",
+        "fr-###", "sc-###", "usn", "usn/acn",
         "nothing is marked [x] while the suite is red", "cur-kit-reviewer", "matched the scenario to the test",
         "the stop hook may submit /speckit-converge after /speckit-implement",
         "specify workflow run .cursor/cur-kit/workflow.yml", "spec.md", "plan.md",

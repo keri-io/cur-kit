@@ -244,14 +244,15 @@ the agent type and never passes a model.
 
 | Agent | Model | Job |
 | --- | --- | --- |
-| `cur-kit-scout` | `composer-2.5` | Research for the plan. Read-only. |
-| `cur-kit-writer` | `composer-2.5` | One task in its own files, red test first. |
-| `cur-kit-witness` | `composer-2.5` | Walks a user flow in the running app. Read-only. |
+| `cur-kit-scout` | `grok-4.7-high` | Research for the plan. Read-only. |
+| `cur-kit-writer` | `grok-4.7-high` | One task in its own files, red test first. |
+| `cur-kit-witness` | `grok-4.7-high` | Walks a user flow in the running app. Read-only. |
 | `cur-kit-reviewer` | `grok-4.7-xhigh, 500k` | Checks that a test proves its scenario. Read-only. |
 | `cur-kit-diagnose` | `grok-4.7-medium` | Finds the cause of one cluster of failing tests. Read-only. |
 
-The rule `.cursor/rules/cur-kit.mdc` applies to every chat. The parent plans, and at most two writers run at once,
-on separate files. Test names cite `FR-###`, `SC-###`, `USn`, or `USn/ACn`. Nothing is marked `[x]` while the suite
+The rule `.cursor/rules/cur-kit.mdc` applies to every chat. The parent plans. Writers run up to twelve at once, on
+separate files, and a large job may run more. Scouts do the same. Test names cite `FR-###`, `SC-###`, `USn`, or
+`USn/ACn`. Nothing is marked `[x]` while the suite
 is red, or before the reviewer has matched the scenario to the test. Commits and pushes are the parent's.
 
 ## Differences from the plan
