@@ -6,6 +6,9 @@ All notable changes to this project are documented here. The format follows Keep
 
 ### Added
 
+- A Cursor Project path. When a chat can start Project workers, the coordinator uses those workers, a shared brief,
+  and the Project task board. A chat that cannot start a worker keeps today's subagents. The stop hook still owns
+  `/speckit-converge` and `/speckit-implement`.
 - A Linear mirror of the repo. The stop hook writes `linear-board.json` and the Cursor Linear MCP applies it on
   the next turn. A personal account needs no team key. `LINEAR_API_KEY` remains an optional direct path. Spec Kit
   skills stay untouched.

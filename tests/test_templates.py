@@ -15,7 +15,15 @@ MODELS = {
     "cur-kit-reviewer": "grok-4.7[effort=xhigh,context=500k]",
     "cur-kit-diagnose": "grok-4.7-high",
 }
-FILES = [f"agents/{name}.md" for name in MODELS] + ["rules/cur-kit.mdc", "workflow.yml"]
+FILES = [f"agents/{name}.md" for name in MODELS] + [
+    "rules/cur-kit.mdc", "rules/cur-kit-project.mdc", "context/brief.md", "workflow.yml",
+]
+PROJECT = [
+    "if this chat cannot start a cursor project worker, ignore the rest of this rule",
+    "up to twelve", "more when the job is large", "/cursor/stores/self/cur-kit/brief.md",
+    "do not submit /speckit-implement or /speckit-converge", "cur-kit-diagnose",
+    "the cloud stop hook remains the result that drives the loop",
+]
 EMPHASIS = re.compile(r"\b(MUST|NEVER|ALWAYS|CRITICAL|IMPORTANT|ONLY|NOT|DO|NO|STOP|REQUIRED|WARNING)\b")
 WRITER = ["one task", "its own files", "test first", "named after the scenario key", "minimum code",
           "never run the full suite", "files you touched", "red and green output", "open questions",
@@ -61,6 +69,8 @@ def test_ac14_agent_files_have_name_description_and_model(name, model):
     assert (fields["name"], fields["model"]) == (name, model)
     assert len(fields["description"]) > 40 and body
     assert ": " not in fields["description"] and " #" not in fields["description"]
+    assert "cursor/stores/self/cur-kit/brief.md" in body
+    assert "do not message other workers" in body and "do not change the project task board" in body
 
 
 @pytest.mark.parametrize("name", MODELS)
@@ -91,6 +101,12 @@ def test_ac13_rule_always_applies_and_states_the_contract():
     fields, body = split("rules/cur-kit.mdc")
     assert fields["alwaysApply"] == "true"
     assert [phrase for phrase in RULE if phrase not in body] == []
+    project_fields, project = split("rules/cur-kit-project.mdc")
+    assert project_fields["alwaysApply"] == "true"
+    assert [phrase for phrase in PROJECT if phrase not in project] == []
+    hook_dir = Path(curkit.__file__).parent
+    names = ("skill_loop.py", "skill_next.py", "hooks.py")
+    assert all("stores/self" not in (hook_dir / name).read_text(encoding="utf-8") for name in names)
 
 
 def test_ac15_workflow_has_the_required_pieces():

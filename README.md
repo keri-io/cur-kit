@@ -67,6 +67,8 @@ Then it writes these files. It writes a file only when it is missing and never o
 - `.cursor/agents/cur-kit-scout.md`, `cur-kit-writer.md`, `cur-kit-witness.md`, `cur-kit-reviewer.md`, and
   `cur-kit-diagnose.md`.
 - `.cursor/rules/cur-kit.mdc`, the always-on rule.
+- `.cursor/rules/cur-kit-project.mdc`, the Cursor Project path. A chat that cannot start a Project worker ignores it.
+- `.cursor/cur-kit/project-brief.md`, the blank brief the coordinator fills into the Project Context.
 - `.cursor/cur-kit/workflow.yml`, the converge loop.
 - `.cursor/hooks/cur-kit`, the project hook command, and entries in `.cursor/hooks.json` for `stop`,
   `sessionStart`, `beforeSubmitPrompt`, and `afterAgentResponse`. `stop` runs `bash .cursor/hooks/cur-kit stop`
@@ -298,6 +300,36 @@ The rule `.cursor/rules/cur-kit.mdc` applies to every chat. The parent plans. Wr
 separate files, and a large job may run more. Scouts do the same. Test names cite `FR-###`, `SC-###`, `USn`, or
 `USn/ACn`. Nothing is marked `[x]` while the suite
 is red, or before the reviewer has matched the scenario to the test. Commits and pushes are the parent's.
+
+## Cursor Projects
+
+`.cursor/rules/cur-kit-project.mdc` also applies to every chat, and its first sentence says to ignore the rest when
+this chat cannot start a Cursor Project worker. A normal chat, and a cloud agent that is not a Project coordinator,
+keeps today's subagents. The stop hook still submits `/speckit-converge` and `/speckit-implement`. The coordinator
+does not.
+
+When the coordinator can start workers, it starts `cur-kit-scout`, `cur-kit-writer`, `cur-kit-witness`,
+`cur-kit-reviewer`, and `cur-kit-diagnose` with the models in those files. It does not pass a model. Writers stay one
+task each, on separate files, up to twelve, and more when the job is large. Scouts stay up to twelve. If a worker
+cannot be started, it uses a subagent of that same type.
+
+After each skill turn, and again after the stop hook answers, the coordinator fills
+`/cursor/stores/self/cur-kit/brief.md` from `.cursor/cur-kit/project-brief.md`: the feature folder, the current
+skill, the open task ids, the loop phase (`implement`, `converge`, or `stopped`), and whether the last check was red
+or green. No secrets and no command logs. The hook does not read that file. On a cloud agent outside a Project the
+same path is private.
+
+The coordinator mirrors `tasks.md` onto the Project task board. An open task stays open. A task is in progress only
+while a writer holds it. Done only after `tasks.md` is `[x]`, the reviewer matched the test, and the suite is not
+red. The board never checks a box in `tasks.md`. `tasks.md` stays the file the stop hook reads. The Linear board
+stays a separate mirror.
+
+A worker a coordinator started reads the brief when it exists, reports to that coordinator, does not message other
+workers, and does not change the task board. A CI or pull-request subscription is created only when you ask. A red
+CI run goes to `cur-kit-diagnose` and does not replace the stop hook. The coordinator messages another teammate's
+coordinator only about files both tasks name, and does not send `skill.json`, `/cursor/stores/user`, or secrets. A
+local agent runs only a check that must run on your machine. The cloud stop hook remains the result that drives the
+loop.
 
 ## Differences from the plan
 
