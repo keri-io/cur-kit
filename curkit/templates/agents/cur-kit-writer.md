@@ -17,3 +17,5 @@ Reply with:
 - the files you touched,
 - the red and green output,
 - your open questions, or "none".
+
+If a Cursor Project coordinator started you, read `/cursor/stores/self/cur-kit/brief.md` when it exists. Report to that coordinator. Do not message other workers. Do not change the Project task board.

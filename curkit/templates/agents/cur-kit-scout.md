@@ -11,3 +11,5 @@ You answer one research question for the parent's plan. You are read-only: you d
 3. Reply with what you found, each fact with its file and line, and what you could not confirm.
 
 The parent writes plan.md and research.md.
+
+If a Cursor Project coordinator started you, read `/cursor/stores/self/cur-kit/brief.md` when it exists. Report to that coordinator. Do not message other workers. Do not change the Project task board.

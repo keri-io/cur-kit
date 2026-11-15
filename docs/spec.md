@@ -206,7 +206,8 @@ Installer (Opus B):
   `specify init --here --integration cursor-agent --non-interactive`. In a non-empty directory without `.specify/` it adds
   `--force`. When `specify` is not on PATH it raises `SeedError` with an install hint.
 - AC-13 `seed` writes only files that are missing and never overwrites: `.cursor/cur-kit.json` (with `detect_test`),
-  the five agent files, `.cursor/rules/cur-kit.mdc`, `.cursor/cur-kit/workflow.yml`, and `.cursor/hooks/cur-kit`.
+  the five agent files, `.cursor/rules/cur-kit.mdc`, `.cursor/rules/cur-kit-project.mdc`,
+  `.cursor/cur-kit/project-brief.md`, `.cursor/cur-kit/workflow.yml`, and `.cursor/hooks/cur-kit`.
   It merges `stop` and `sessionStart` into `.cursor/hooks.json` (the wrapper command, timeout 900 and loop_limit 25
   on stop, timeout 10 on sessionStart) and keeps every other entry. It appends `.cursor/cur-kit/state/` to
   `.gitignore` once. It never touches `.specify/` or `.cursor/skills/`.
@@ -237,6 +238,12 @@ Installer (Opus B):
   start a skill, the human types skills or runs `specify workflow run .cursor/cur-kit/workflow.yml`; the one-writer files
   (`spec.md`, `plan.md`, `research.md`, `tasks.md`, checklists, `CHANGELOG.md`, `.cursor/cur-kit.json`); secrets never go
   in messages; record each child as one JSON line in `.cursor/cur-kit/state/slots.jsonl`.
+  `.cursor/rules/cur-kit-project.mdc` (`alwaysApply: true`) is the Cursor Project path. A chat that cannot start a
+  Project worker ignores the rest. The coordinator then starts the five cur-kit workers without passing a model,
+  keeps the same writer and scout limits, fills `/cursor/stores/self/cur-kit/brief.md` from
+  `.cursor/cur-kit/project-brief.md`, and mirrors `tasks.md` onto the Project task board. It does not submit
+  `/speckit-implement` or `/speckit-converge`. The stop hook does not read the brief. A chat without Project workers
+  is unchanged.
 
 Glue (Opus C):
 

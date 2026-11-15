@@ -1,0 +1,17 @@
+---
+description: Cursor Project path for Spec Kit. Skip it when this chat cannot start a Project worker.
+alwaysApply: true
+---
+
+# cur-kit on a Cursor Project
+
+If this chat cannot start a Cursor Project worker, ignore the rest of this rule. A normal chat keeps today's subagents, the same agent files, and the same models.
+
+- Start Project workers named `cur-kit-scout`, `cur-kit-writer`, `cur-kit-witness`, `cur-kit-reviewer`, and `cur-kit-diagnose`. Do not pass a model. Writers stay one task each, on separate files, up to twelve, and more when the job is large. Scouts stay up to twelve. If a worker cannot be started, use a subagent of that same type.
+- After each worker returns, append one JSON line to `.cursor/cur-kit/state/slots.jsonl`. The coordinator still commits and pushes.
+- After each skill turn, and again after the stop hook answers, fill `/cursor/stores/self/cur-kit/brief.md` from `.cursor/cur-kit/project-brief.md`. Fields are the feature folder, the current skill, the open task ids, the loop phase (`implement`, `converge`, or `stopped`), and whether the last check was red or green. No secrets and no command logs. The stop hook does not read this file.
+- Mirror `tasks.md` onto the Project task board. An open task stays open. A task is in progress only while a writer holds it. Done only after `tasks.md` is `[x]`, the reviewer matched the test, and the suite is not red. The board never checks a box in `tasks.md`.
+- Do not submit `/speckit-implement` or `/speckit-converge`. Refresh the brief and the board after the hook's follow-up.
+- Create a CI or pull-request subscription only when the user asks. A red CI run goes to `cur-kit-diagnose`. It does not replace the stop hook.
+- Message another teammate's coordinator only about files both tasks name. Do not send `skill.json`, `/cursor/stores/user`, or secrets.
+- Start a local agent only for a check that must run on the user's machine. The cloud stop hook remains the result that drives the loop.

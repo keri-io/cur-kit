@@ -12,7 +12,12 @@ from curkit.project_hooks import AFTER_COMMAND, BEFORE_COMMAND, START_COMMAND, S
 TEMPLATES = Path(curkit.__file__).parent / "templates"
 AGENTS = ["scout", "writer", "witness", "reviewer", "diagnose"]
 COPIES = {f".cursor/agents/cur-kit-{name}.md": f"agents/cur-kit-{name}.md" for name in AGENTS}
-COPIES |= {".cursor/rules/cur-kit.mdc": "rules/cur-kit.mdc", ".cursor/cur-kit/workflow.yml": "workflow.yml"}
+COPIES |= {
+    ".cursor/rules/cur-kit.mdc": "rules/cur-kit.mdc",
+    ".cursor/rules/cur-kit-project.mdc": "rules/cur-kit-project.mdc",
+    ".cursor/cur-kit/workflow.yml": "workflow.yml",
+    ".cursor/cur-kit/project-brief.md": "context/brief.md",
+}
 STATE = ".cursor/cur-kit/state/"
 HOOKS = [
     f"add {WRAPPER}",

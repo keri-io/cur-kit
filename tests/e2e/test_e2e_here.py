@@ -22,7 +22,9 @@ WRAPPER = [
     ".cursor/cur-kit.json",
     *(f".cursor/agents/cur-kit-{name}.md" for name in MODELS),
     ".cursor/rules/cur-kit.mdc",
+    ".cursor/rules/cur-kit-project.mdc",
     ".cursor/cur-kit/workflow.yml",
+    ".cursor/cur-kit/project-brief.md",
     ".cursor/hooks.json",
     ".cursor/hooks/cur-kit",
 ]
